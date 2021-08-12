@@ -1,3 +1,86 @@
+
+# Creating modules
+## Background info
+A lot of documentation exists but is directed mainly concerned with contributing new modules to the nf-core/modules repository.
+    - https://nf-co.re/developers/tutorials/dsl2_modules_tutorial
+    - https://github.com/nf-core/modules
+
+I think the best resource for learning about the structure of modules and how they incorporate into workflows is the video
+https://youtu.be/ggGGhTMgyHI?t=1172   , starting at 19:30 
+
+It also looks like an additional helpful video will be released on September 7, 2021 : https://nf-co.re/events/2021/bytesize-19-dsl2-pipeline-starter
+
+## Creating local modules for benchmarking
+To add a new local module
+
+Clone this repo and create a new branch to work on
+
+Install `nf-core` using conda:
+
+e.g. both nf-core and nextflow
+```
+conda create --name nf-core python=3.7 nf-core nextflow
+```
+
+Navigate to the `metaBenchmarks` directory.
+
+To see if a module already exists from nf-core run:
+
+```
+nf-core modules list remote
+```
+
+If it exists you can install it using:
+e.g. for `samtools/sort`
+
+```
+nfcore modules install nf-core modules list remote
+```
+
+If a module doesn't exist then create your own using
+
+```
+nf-core modules create
+```
+
+When prompted for `Name of tool/subtool:`, if, for example, you're creating a DIAMOND BLASTp module you would enter `diamond` when prompted.
+
+
+Set all benchmarking processes `Process resource label` as `process_high`. This will allow providing all benchmark processes the same resources.
+
+When prompted `Will the module require a meta map of sample information? (yes/no) [y/n] (y):` enter `y`
+
+# Creating nf-core modules for addition to nf-core
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+---
+# nf-core template readme:
+
+
+
+
+
 # ![nf-core/benchmark](docs/images/nf-core-benchmark_logo.png)
 
 [![GitHub Actions CI Status](https://github.com/nf-core/benchmark/workflows/nf-core%20CI/badge.svg)](https://github.com/nf-core/benchmark/actions?query=workflow%3A%22nf-core+CI%22)
