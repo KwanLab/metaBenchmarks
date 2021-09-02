@@ -5,6 +5,7 @@ params.options = [:]
 options        = initOptions(params.options)
 
 process VAMB {
+    // https://github.com/RasmussenLab/vamb
     tag "$meta.id"
     label 'process_high'
     publishDir "${params.outdir}",
