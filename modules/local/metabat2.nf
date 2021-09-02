@@ -24,7 +24,7 @@ process METABAT2 {
     path(bam)
 
     output:
-    tuple val(meta), path("*.fa"),  emit: bins
+    tuple val(meta), path("bins/*.fa"),  emit: bins
     tuple val(meta), path("depth.txt"), emit: depth
     path "*.version.txt"          , emit: version
 
@@ -44,7 +44,7 @@ process METABAT2 {
         -t "$task.cpus" \\
         -i "$assembly" \\
         -a depth.txt  \\
-        -o "MetaBat2/${assembly.baseName}" \\
+        -o "bins/${assembly.baseName}" \\
         -m ${params.length_cutoff} \\
         --unbinned \\
         --seed ${params.seed} \\
