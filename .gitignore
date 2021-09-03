@@ -1,8 +1,4 @@
 .nextflow*
-<<<<<<< HEAD
-work/*
-results/*
-=======
 work/
 data/
 results/
@@ -10,4 +6,3 @@ results/
 testing/
 testing*
 *.pyc
->>>>>>> 251c4d2d3f1767df86c6cf81ce460ca9496ca09b
