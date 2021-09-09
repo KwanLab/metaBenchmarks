@@ -20,7 +20,7 @@ process KRAKEN2 {
     }
 
     input:
-    tuple val(meta), path(reads)
+    tuple val(meta), path(contigs)
     path  db
 
     output:
@@ -38,7 +38,7 @@ process KRAKEN2 {
         --threads $task.cpus \\
         --output ${prefix}.kraken2.output.txt \\
         --report ${prefix}.kraken2.report.txt \\
-        $reads
+        $contigs
 
     echo \$(kraken2 --version 2>&1) | sed 's/^.*Kraken version //; s/ .*\$//' > ${software}.version.txt
     """
