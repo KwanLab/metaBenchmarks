@@ -20,8 +20,7 @@ process METABAT2 {
     }
 
     input:
-    tuple val(meta), path (assembly)
-    path(bam)
+    tuple val(meta), path (assembly), path(bam)
 
     output:
     tuple val(meta), path("bins/*.fa"),  emit: bins

@@ -18,8 +18,9 @@ workflow  {
             .map { name ->
                     def meta = [:]
                     meta.id = name.simpleName
-                    return [meta, name]
+                    return [meta, name, bam]
             }
         .set {ch_assembly}
-    METABAT2(ch_assembly, bam)
+    METABAT2(ch_assembly)
 }
+
