@@ -11,12 +11,14 @@ process KRAKEN2 {
         mode: params.publish_dir_mode,
         saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:getSoftwareName(task.process), meta:meta, publish_by_meta:['id']) }
 
-    // TODO nf-core: See section in main README for further information regarding finding and adding container addresses to the section below.
     conda (params.enable_conda ? "bioconda::kraken2=2.1.2" : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
-        container "https://depot.galaxyproject.org/singularity/YOUR-TOOL-HERE"
+        // This container was taken from official nf-core module for kraken2
+        container "https://depot.galaxyproject.org/singularity/mulled-v2-5799ab18b5fc681e75923b2450abaa969907ec98:941789bd7fe00db16531c26de8bf3c5c985242a5-0"
     } else {
-        container 'quay.io/biocontainers/mulled-v2-5799ab18b5fc681e75923b2450abaa969907ec98:941789bd7fe00db16531c26de8bf3c5c985242a5-0'
+        // This container was taken from official nf-core module for kraken2
+        // For information on mulled-v2 see https://github.com/BioContainers/mulled
+        container "quay.io/biocontainers/mulled-v2-5799ab18b5fc681e75923b2450abaa969907ec98:941789bd7fe00db16531c26de8bf3c5c985242a5-0"
     }
 
     input:

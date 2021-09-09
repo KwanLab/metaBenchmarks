@@ -5,7 +5,7 @@ include {KRAKEN2} from '../kraken2.nf'
 
 // example command to run:
 // cd into "metaBenchmarks" diectory 
-// nextflow run modules/local/tests/kraken2_test.nf -profile conda
+// nextflow run modules/local/tests/kraken2_test.nf -profile <conda/ docker>
 // Change the bath to aligned and sorted bam file as well as the assembly file
 
 workflow  {
