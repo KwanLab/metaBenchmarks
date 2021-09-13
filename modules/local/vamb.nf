@@ -12,7 +12,7 @@ process VAMB {
         mode: params.publish_dir_mode,
         saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:getSoftwareName(task.process), meta:meta, publish_by_meta:['id']) }
 
-    conda (params.enable_conda ? "bioconda::vamb=3.0.2" : null)
+    conda (params.enable_conda ? "bioconda::vamb" : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
         container "https://depot.galaxyproject.org/singularity/vamb:3.0.2--py36hc5360cc_1"
     } else {
