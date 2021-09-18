@@ -25,25 +25,42 @@ process METABAT2 {
     output:
     tuple val(meta), path("bins/*.fa"),  emit: bins
     tuple val(meta), path("depth.txt"), emit: depth
+    tuple val(meta), path("binning.tsv"), emit: binning
 
-    script:
+    // See https://seqera.io/training/#_script_parameters
+    shell:
     def software = getSoftwareName(task.process)
     def prefix   = options.suffix ? "${meta.id}${options.suffix}" : "${meta.id}"
-
-    """
+    
+    '''
     jgi_summarize_bam_contig_depths \\
         --outputDepth depth.txt \\
-        $bam
+        !{bam}
     
     metabat2 \\
-        -t "$task.cpus" \\
-        -i "$assembly" \\
+        -t !{task.cpus} \\
+        -i !{assembly} \\
         -a depth.txt  \\
-        -o "bins/${assembly.baseName}" \\
-        -m ${params.length_cutoff} \\
+        -o bins/!{assembly.baseName} \\
+        -m !{params.length_cutoff} \\
         --unbinned \\
-        --seed ${params.seed} \\
-        $options.args
+        --seed !{params.seed} \\
+        !{options.args}
+    
 
-    """
+    T=$(printf '\t')
+    header1="contig"
+    header2="cluster"
+
+    echo "$header1$T$header2" > binning.tsv
+
+    for bin in $(ls bins/!{assembly.baseName}*{[0-9],unbinned}.fa);
+    do
+            cluster=$(basename $bin .fa)
+            # See https://unix.stackexchange.com/a/527565/450418 and https://stackoverflow.com/a/18890431/12671809
+            echo "$(grep ">" $bin | sed 's/^.//' | sed -r "s|$|\t$cluster|")" >> binning.tsv
+
+    done
+
+    '''
 }
