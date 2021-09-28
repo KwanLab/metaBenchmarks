@@ -50,8 +50,6 @@ Set all benchmarking processes `Process resource label` as `process_high`. This 
 
 When prompted `Will the module require a meta map of sample information? (yes/no) [y/n] (y):` enter `y`
 
-# Creating nf-core modules for addition to nf-core
-
 
 
 
