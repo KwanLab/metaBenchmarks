@@ -44,6 +44,7 @@ include { GET_SOFTWARE_VERSIONS } from '../modules/local/get_software_versions' 
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
 include { INPUT_CHECK } from '../subworkflows/local/input_check' addParams( options: [:] )
+include { AUTOMETA_V1 } from '../subworkflows/local/autometa_v1' addParams( options: [:] )
 
 /*
 ========================================================================================
@@ -87,6 +88,9 @@ workflow BENCHMARK {
         INPUT_CHECK.out.reads
     )
     ch_software_versions = ch_software_versions.mix(FASTQC.out.version.first().ifEmpty(null))
+
+
+    AUTOMETA_V1(#TODO: ADD INPUTS)
 
     //
     // MODULE: Pipeline reporting
