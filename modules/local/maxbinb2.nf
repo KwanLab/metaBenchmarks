@@ -38,8 +38,6 @@ process MAXBINB2 {
     path "*.version.txt"                    , emit: version
 
     script:
-    def software = getSoftwareName(task.process)
-    def prefix   = options.suffix ? "${meta.id}${options.suffix}" : "${meta.id}"
     """
    
     run_MaxBin.pl \\
@@ -48,7 +46,8 @@ process MAXBINB2 {
         -reads2 ""${read_reverse}" \\
         -out maxbin2_output
    
-    echo \$(samtools --version 2>&1) | sed 's/^.*samtools //; s/Using.*\$//' > ${software}.version.txt
+    run_MaxBin.pl -v | head -n 1 | sed 's/^MaxBin //' > MAXBINB2.version.txt
+
     """
 }
 
