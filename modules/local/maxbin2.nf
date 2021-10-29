@@ -21,59 +21,33 @@ include { initOptions; saveFiles; getSoftwareName } from './functions'
 params.options = [:]
 options        = initOptions(params.options)
 
-process MAXBIN2 {
+process MAXBINB2 {
     tag "$meta.id"
     label 'process_high'
     publishDir "${params.outdir}",
         mode: params.publish_dir_mode,
         saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:getSoftwareName(task.process), meta:meta, publish_by_meta:['id']) }
 
-    // TODO nf-core: List required Conda package(s).
-    //               Software MUST be pinned to channel (i.e. "bioconda"), version (i.e. "1.10").
-    //               For Conda, the build (i.e. "h9402c20_2") must be EXCLUDED to support installation on different operating systems.
-    // TODO nf-core: See section in main README for further information regarding finding and adding container addresses to the section below.
-    conda (params.enable_conda ? "bioconda::maxbin2=2.2.7" : null)
-    if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
-        container "https://depot.galaxyproject.org/singularity/YOUR-TOOL-HERE"
-    } else {
-        container "quay.io/biocontainers/YOUR-TOOL-HERE"
-    }
-
+    container "nanozoo/maxbin2:2.2.7--b643a6b"
+    
     input:
-    // TODO nf-core: Where applicable all sample-specific information e.g. "id", "single_end", "read_group"
-    //               MUST be provided as an input via a Groovy Map called "meta".
-    //               This information may not be required in some instances e.g. indexing reference genome files:
-    //               https://github.com/nf-core/modules/blob/master/software/bwa/index/main.nf
-    // TODO nf-core: Where applicable please provide/convert compressed files as input/output
-    //               e.g. "*.fastq.gz" and NOT "*.fastq", "*.bam" and NOT "*.sam" etc.
-    tuple val(meta), path(bam)
+    tuple val(meta), path(contig), path(read_forward), path(read_reverse)
 
     output:
-    // TODO nf-core: Named file extensions MUST be emitted for ALL output channels
-    tuple val(meta), path("*.bam"), emit: bam
-    // TODO nf-core: List additional required output channels/values here
-    path "*.version.txt"          , emit: version
+    tuple val(meta), path("maxbin2_output*"), emit: maxbin2_output
+    path "*.version.txt"                    , emit: version
 
     script:
-    def software = getSoftwareName(task.process)
-    def prefix   = options.suffix ? "${meta.id}${options.suffix}" : "${meta.id}"
-    // TODO nf-core: Where possible, a command MUST be provided to obtain the version number of the software e.g. 1.10
-    //               If the software is unable to output a version number on the command-line then it can be manually specified
-    //               e.g. https://github.com/nf-core/modules/blob/master/software/homer/annotatepeaks/main.nf
-    // TODO nf-core: It MUST be possible to pass additional parameters to the tool as a command-line string via the "$options.args" variable
-    // TODO nf-core: If the tool supports multi-threading then you MUST provide the appropriate parameter
-    //               using the Nextflow "task" variable e.g. "--threads $task.cpus"
-    // TODO nf-core: Please replace the example samtools command below with your module's command
-    // TODO nf-core: Please indent the command appropriately (4 spaces!!) to help with readability ;)
     """
-    samtools \\
-        sort \\
-        $options.args \\
-        -@ $task.cpus \\
-        -o ${prefix}.bam \\
-        -T $prefix \\
-        $bam
+   
+    run_MaxBin.pl \\
+        -contig "${contig}" \\
+        -reads "${read_forward}" \\
+        -reads2 ""${read_reverse}" \\
+        -out maxbin2_output
+   
+    run_MaxBin.pl -v | head -n 1 | sed 's/^MaxBin //' > MAXBINB2.version.txt
 
-    echo \$(samtools --version 2>&1) | sed 's/^.*samtools //; s/Using.*\$//' > ${software}.version.txt
     """
 }
+
