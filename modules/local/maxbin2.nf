@@ -21,7 +21,7 @@ include { initOptions; saveFiles; getSoftwareName } from './functions'
 params.options = [:]
 options        = initOptions(params.options)
 
-process MAXBINB2 {
+process MAXBIN2 {
     tag "$meta.id"
     label 'process_high'
     publishDir "${params.outdir}",
