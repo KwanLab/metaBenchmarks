@@ -50,13 +50,27 @@ Set all benchmarking processes `Process resource label` as `process_high`. This 
 
 When prompted `Will the module require a meta map of sample information? (yes/no) [y/n] (y):` enter `y`
 
-# Creating nf-core modules for addition to nf-core
 
 
 
+# Modules Information
+
+## Autometa v1.0.2
+
+Type: Binning of Contigs
+
+Website:
+https://github.com/KwanLab/Autometa/releases/tag/1.0.2
 
 
+Inputs:
+  - Nucleotide contigs
+Outputs:
 
+Code to run individual module:
+```{bash}
+
+```
 
 
 
