@@ -72,9 +72,36 @@ Code to run individual module:
 
 ```
 
+## Maxbin2 v2.2.7
 
+Type: Binning of Contigs
 
+Website:
+https://sourceforge.net/projects/maxbin2/
 
+Inputs:
+  - Nucleotide contigs
+  - Reads files (forward and reverse, used to calculate abundance data)
+
+Outputs:
+maxbin2_output.001.fasta
+maxbin2_output.002.fasta
+maxbin2_output.003.fasta
+maxbin2_output.004.fasta
+maxbin2_output.abund1
+maxbin2_output.abund2
+maxbin2_output.abundance
+maxbin2_output.log
+maxbin2_output.marker
+maxbin2_output.marker_of_each_bin.tar.gz
+maxbin2_output.noclass
+maxbin2_output.summary
+maxbin2_output.tooshort
+
+Code to run individual module (to run a module test script, cd to metaBenchmarks/ and run the test nextflow file from there):
+```{bash}
+nextflow run modules/local/tests/maxbin2_test.nf
+```
 
 
 
