@@ -4,9 +4,10 @@ include { initOptions; saveFiles; getSoftwareName } from './functions'
 params.options = [:]
 options        = initOptions(params.options)
 
-// docker build git@github.com:KwanLab/Autometa.git#c85ab9673345f62e9d6a7e1aecb2d1c4e1b0c598 -t jasonkwan/autometa:metabenchmark-v1
+// To build docker image locally:
+// docker build git@github.com:KwanLab/Autometa.git#c85ab9673345f62e9d6a7e1aecb2d1c4e1b0c598 -t jasonkwan/autometa:1.0.3
 
-process AUTOMETA_V1_BIN {
+process AUTOMETA_V1_BINNING {
 
     tag "$meta.id"
     label 'process_high'
@@ -14,12 +15,11 @@ process AUTOMETA_V1_BIN {
         mode: params.publish_dir_mode,
         saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:getSoftwareName(task.process), meta:meta, publish_by_meta:['id']) }
 
-    container "jasonkwan/autometa:metabenchmark-v1"
+    container "jasonkwan/autometa:1.0.3"
 
 
     input:
-    tuple val(meta), path(fasta)
-    path(taxonomy_table)
+    tuple val(meta), path(fasta), path(taxonomy_table)
     path(db_dir)
 
     output:
