@@ -63,23 +63,39 @@ workflow BENCHMARK {
 
     ch_software_versions = Channel.empty()
 
-    //
-    // SUBWORKFLOW: Read in samplesheet, validate and stage input files
-    //
-    INPUT_CHECK (
-        ch_input
-    )
-    ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
+    // Not necessary but shows what channels may be set
+    fwd_reads_ch = empty()
+    rev_reads_ch = empty()
+    assembly_ch = empty()
+    coverage_tsv_ch = empty()
+    alignments_bam_ch = empty()
 
-    //
-    // MODULE: Run FastQC
-    //
+    if (params.mock){
+        // If mock is true then create the mock metagenome data 
+        CREATE_MOCK()
+
+        fwd_reads_ch = CREATE_MOCK.out.reads_1
+        rev_reads_ch = CREATE_MOCK.out.reads_2
+        assembly_ch = CREATE_MOCK.out.assembly
+
+    } else {
+        // Else use the user-provided input sample sheet
+        INPUT_CHECK (
+            ch_input
+        )
+
+        fwd_reads_ch = INPUT_CHECK.out.reads_1
+        rev_reads_ch = INPUT_CHECK.out.reads_2
+        assembly_ch = INPUT_CHECK.out.assembly
+
+        ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
+    }   
+    
     FASTQC (
         INPUT_CHECK.out.reads
     )
     ch_versions = ch_versions.mix(FASTQC.out.versions.first())
 
-    AUTOMETA_V1(#TODO: ADD INPUTS)
 
     //
     // MODULE: Pipeline reporting
