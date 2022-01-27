@@ -2,10 +2,10 @@ params.autometa_v1_bin                      = [:]
 params.autometa_v1_unclustered_recruitment  = [:]
 
 
-include{ AUTOMETA_V1_BINNING                     } from "./modules/local/autometa_v1_binning.nf"                    addParams( options: params.autometa_v1_bin                     )
-include{ AUTOMETA_V1_CALCULATE_READ_COVERAGE     } from "./modules/local/autometa_v1_calculate_read_coverage.nf"    addParams( options: params.autometa_v1_bin                     )
-include{ AUTOMETA_V1_MAKE_TAXONOMY_TABLE         } from "./modules/local/autometa_v1_make_taxonomy_table.nf"        addParams( options: params.autometa_v1_bin                     )
-include{ AUTOMETA_V1_UNCLUSTERED_RECRUITMENT     } from "./modules/local/autometa_v1_unclustered_recruitment.nf"    addParams( options: params.autometa_v1_unclustered_recruitment )
+include{ AUTOMETA_V1_BINNING                     } from "./modules/local/autometa_v1_binning.nf"                 
+include{ AUTOMETA_V1_CALCULATE_READ_COVERAGE     } from "./modules/local/autometa_v1_calculate_read_coverage.nf" 
+include{ AUTOMETA_V1_MAKE_TAXONOMY_TABLE         } from "./modules/local/autometa_v1_make_taxonomy_table.nf"     
+include{ AUTOMETA_V1_UNCLUSTERED_RECRUITMENT     } from "./modules/local/autometa_v1_unclustered_recruitment.nf" 
 
 workflow AUTOMETA_V1 {
     take:

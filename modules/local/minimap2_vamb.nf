@@ -1,15 +1,6 @@
-// Import generic module functions
-include { initOptions; saveFiles; getSoftwareName } from './functions'
-
-params.options = [:]
-options        = initOptions(params.options)
-
 process MINIMAP2_VAMB {
     tag "$meta.id"
     label 'process_low'
-    publishDir "${params.outdir}",
-        mode: params.publish_dir_mode,
-        saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:getSoftwareName(task.process), meta:meta, publish_by_meta:['id']) }
 
     conda (params.enable_conda ? "bioconda::minimap2=2.12 bioconda::samtools=1.9" : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
@@ -26,10 +17,10 @@ process MINIMAP2_VAMB {
         path "*.version.txt"          , emit: version
 
     script:
+        def args = task.ext.args ?: ''
         def software = getSoftwareName(task.process)
         def prefix   = options.suffix ? "${meta.id}${options.suffix}" : "${meta.id}"
         def input_reads = meta.single_end ? "$reads" : "${reads[0]} ${reads[1]}"
-
     """
     minimap2 \\
         -t $task.cpus \\

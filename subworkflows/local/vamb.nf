@@ -1,7 +1,6 @@
-params.options = [:]
 
-include { VAMB } from '../../modules/local/vamb' addParams( options: params.vamb_options )
-include { MINIMAP2_VAMB } from '../../modules/local/minimap2_vamb' addParams( options: params.minimap2_vamb_options )
+include { VAMB } from '../../modules/local/vamb'
+include { MINIMAP2_VAMB } from '../../modules/local/minimap2_vamb'
 
 workflow VAMB_BENCH {
     take:
