@@ -1,8 +1,8 @@
 //
-// This file holds several functions specific to the workflow/socialgene.nf in the nf-core/socialgene pipeline
+// This file holds several functions specific to the workflow/metabenchmarks.nf in the metabenchmarks pipeline
 //
 
-class WorkflowSocialgene {
+class WorkflowMetabenchmarks {
 
     //
     // Check and validate parameters
