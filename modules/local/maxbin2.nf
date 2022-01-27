@@ -1,15 +1,6 @@
-// Import generic module functions
-include { initOptions; saveFiles; getSoftwareName } from './functions'
-
-params.options = [:]
-options        = initOptions(params.options)
-
 process MAXBIN2 {
     tag "$meta.id"
     label 'process_high'
-    publishDir "${params.outdir}",
-        mode: params.publish_dir_mode,
-        saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:getSoftwareName(task.process), meta:meta, publish_by_meta:['id']) }
 
     container "nanozoo/maxbin2:2.2.7--b643a6b"
     
@@ -21,8 +12,8 @@ process MAXBIN2 {
     path "*.version.txt"                    , emit: version
 
     script:
+    def args = task.ext.args ?: ''
     """
-      
     run_MaxBin.pl \\
         -contig ${contig} \\
         -reads ${fwd_reads} \\
@@ -33,7 +24,6 @@ process MAXBIN2 {
 
     
     run_MaxBin.pl -v | head -n 1 | sed 's/^MaxBin //' > MAXBIN2.version.txt
-
     """
 }
 

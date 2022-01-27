@@ -1,15 +1,6 @@
-// Import generic module functions
-include { initOptions; saveFiles; getSoftwareName } from './functions'
-
-params.options = [:]
-options        = initOptions(params.options)
-
 process KRAKEN2 {
     tag "$meta.id"
     label 'process_high'
-    publishDir "${params.outdir}",
-        mode: params.publish_dir_mode,
-        saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:getSoftwareName(task.process), meta:meta, publish_by_meta:['id']) }
 
     conda (params.enable_conda ? "bioconda::kraken2=2.1.2" : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
@@ -31,12 +22,13 @@ process KRAKEN2 {
     path "*.version.txt"                   , emit: version
 
     script:
+    def args = task.ext.args ?: ''
     def software = getSoftwareName(task.process)
     def prefix   = options.suffix ? "${meta.id}${options.suffix}" : "${meta.id}"
     """
     kraken2 \\
         --db $db \\
-        ${options.args} \\
+        ${args} \\
         --threads $task.cpus \\
         --output ${prefix}.kraken2.output.txt \\
         --report ${prefix}.kraken2.report.txt \\

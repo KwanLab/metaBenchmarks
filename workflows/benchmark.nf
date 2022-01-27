@@ -28,38 +28,24 @@ ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multi
     IMPORT LOCAL MODULES/SUBWORKFLOWS
 ========================================================================================
 */
-
-// Don't overwrite global params.modules, create a copy instead and use that within the main script.
-def modules = params.modules.clone()
-
-//
-// MODULE: Local to the pipeline
-//
-include { GET_SOFTWARE_VERSIONS } from '../modules/local/get_software_versions' addParams( options: [publish_files : ['tsv':'']] )
-include { MAXBIN2 } from '../modules/local/maxbin2' addParams( options: [:] )
-include { METABAT2 } from '../modules/local/metabat2' addParams( options: [:] )
-include { MYCC } from '../modules/local/mycc' addParams( options: [:] )
-include { PHYLOPYTHIASPLUS } from '../modules/local/phylopythiasplus' addParams( options: [:] )
-
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
+include { GET_SOFTWARE_VERSIONS } from '../modules/local/get_software_versions'
 include { INPUT_CHECK } from '../subworkflows/local/input_check' addParams( options: [:] )
+include { AUTOMETA_V1 } from '../subworkflows/local/autometa_v1' addParams( options: [:] )
 
 /*
 ========================================================================================
     IMPORT NF-CORE MODULES/SUBWORKFLOWS
 ========================================================================================
 */
-
-def multiqc_options   = modules['multiqc']
-multiqc_options.args += params.multiqc_title ? Utils.joinModuleArgs(["--title \"$params.multiqc_title\""]) : ''
-
 //
 // MODULE: Installed directly from nf-core/modules
 //
-include { FASTQC  } from '../modules/nf-core/modules/fastqc/main'  addParams( options: modules['fastqc'] )
-include { MULTIQC } from '../modules/nf-core/modules/multiqc/main' addParams( options: multiqc_options   )
+include { FASTQC                      } from '../modules/nf-core/modules/fastqc/main'
+include { MULTIQC                     } from '../modules/nf-core/modules/multiqc/main'
+include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/modules/custom/dumpsoftwareversions/main'
 
 /*
 ========================================================================================
@@ -80,6 +66,7 @@ workflow BENCHMARK {
     INPUT_CHECK (
         ch_input
     )
+    ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
 
     //
     // MODULE: Run FastQC
@@ -87,58 +74,35 @@ workflow BENCHMARK {
     FASTQC (
         INPUT_CHECK.out.reads
     )
-    ch_software_versions = ch_software_versions.mix(FASTQC.out.version.first().ifEmpty(null))
+    ch_versions = ch_versions.mix(FASTQC.out.versions.first())
+
+    AUTOMETA_V1(#TODO: ADD INPUTS)
 
     //
     // MODULE: Pipeline reporting
     //
-    ch_software_versions
-        .map { it -> if (it) [ it.baseName, it ] }
-        .groupTuple()
-        .map { it[1][0] }
-        .flatten()
-        .collect()
-        .set { ch_software_versions }
-
-    GET_SOFTWARE_VERSIONS (
-        ch_software_versions.map { it }.collect()
+    CUSTOM_DUMPSOFTWAREVERSIONS (
+        ch_versions.unique().collectFile(name: 'collated_versions.yml')
     )
 
     //
     // MODULE: MultiQC
     //
-    workflow_summary    = WorkflowBenchmark.paramsSummaryMultiqc(workflow, summary_params)
+    workflow_summary    = Workflow{{ short_name[0]|upper }}{{ short_name[1:] }}.paramsSummaryMultiqc(workflow, summary_params)
     ch_workflow_summary = Channel.value(workflow_summary)
 
     ch_multiqc_files = Channel.empty()
     ch_multiqc_files = ch_multiqc_files.mix(Channel.from(ch_multiqc_config))
     ch_multiqc_files = ch_multiqc_files.mix(ch_multiqc_custom_config.collect().ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
-    ch_multiqc_files = ch_multiqc_files.mix(GET_SOFTWARE_VERSIONS.out.yaml.collect())
+    ch_multiqc_files = ch_multiqc_files.mix(CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect())
     ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]}.ifEmpty([]))
 
     MULTIQC (
         ch_multiqc_files.collect()
     )
-    multiqc_report       = MULTIQC.out.report.toList()
-    ch_software_versions = ch_software_versions.mix(MULTIQC.out.version.ifEmpty(null))
-
-    //
-    // Taxon-profiling Modules
-    //
-    // KRAKEN2(...)
-    // PHYLOPYTHIASPLUS(...)
-    //
-    // Clustering Modules
-    //
-
-    // COMBAK: Implement assembly emit in INPUT_CHECK
-    // COMABK: Check inputs for these modules for setting appropriate
-    // channels
-    // MYCC(INPUT_CHECK.out.assembly)
-    MAXBIN2(INPUT_CHECK.out.assembly)
-    METABAT2(INPUT_CHECK.out.assembly)
-
+    multiqc_report = MULTIQC.out.report.toList()
+    ch_versions    = ch_versions.mix(MULTIQC.out.versions)
 }
 
 /*

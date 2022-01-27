@@ -30,7 +30,8 @@ To see if a module already exists from nf-core run:
 nf-core modules list remote
 ```
 
-If it exists you can install it using:
+If it exists you can install it using: `nfcore modules install`
+
 e.g. for `samtools/sort`
 
 ```
@@ -50,8 +51,59 @@ Set all benchmarking processes `Process resource label` as `process_high`. This 
 
 When prompted `Will the module require a meta map of sample information? (yes/no) [y/n] (y):` enter `y`
 
+## Output Formats
 
+Benchmarking results are aggregated using the `autometa-benchmark` entrypoint. This entrypoint will accept taxon-profiling and binning results. This entrypoint requires a standardized output format for each process. These are detailed below:
 
+### Taxon-profiling
+
+tab-delimited text file containing _at least_ **`contig`** and **`taxid`**. The taxids should correspond to NCBI's taxids located in their taxdump tarball.
+
+NOTE: contigs that were unable to be identified should be assigned the root taxid (taxid = 1)
+
+Example file contents of `taxon_profiling_tool_standardized_output.tsv`
+
+```
+contig  taxid   <some_unnecessary_metadata_column>
+contig_id_1 12345   ...
+contig_id_2 5555   ...
+...
+```
+
+This file can then be supplied to `autometa-benchmark` like so,
+
+```bash
+autometa-benchmark \
+    --benchmark classification \
+    --predictions taxon_profiling_tool_standardized_output.tsv \
+    --reference <reference_file> \
+    --ncbi <path/to/ncbi/taxdump/databases/directory>
+```
+
+NOTE: The taxdump files from NCBI are only required for benchmarking with `autometa-benchmark --benchmark classification`
+
+### Binnning
+
+tab-delimited text file containing _at least_ **`contig`** and **`cluster`**.
+
+NOTE: contigs that were left unclustered should not have any value populate the `cluster` column
+
+Example file contents of `binning_tool_standardized_output.tsv`
+
+```
+contig  cluster   <some_unnecessary_metadata_column>
+contig_id_1 bin_0001   ...
+contig_id_2 bin_0002   ...
+contig_id_2    ...
+...
+```
+
+```bash
+autometa-benchmark \
+    --benchmark binning-classification \
+    --predictions binning_tool_standardized_output.tsv \
+    --reference <reference_file>
+```
 
 # Modules Information
 
