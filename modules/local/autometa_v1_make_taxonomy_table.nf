@@ -1,9 +1,3 @@
-// Import generic module functions
-include { initOptions; saveFiles; getSoftwareName } from './functions'
-
-params.options = [:]
-options        = initOptions(params.options)
-
 // To build docker image locally:
 // docker build git@github.com:KwanLab/Autometa.git#c85ab9673345f62e9d6a7e1aecb2d1c4e1b0c598 -t jasonkwan/autometa:1.0.3
 
@@ -11,12 +5,8 @@ process AUTOMETA_V1_MAKE_TAXONOMY_TABLE {
 
     tag "$meta.id"
     label 'process_high'
-    publishDir "${params.outdir}",
-        mode: params.publish_dir_mode,
-        saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:getSoftwareName(task.process), meta:meta, publish_by_meta:['id']) }
 
     container "jasonkwan/autometa:1.0.3"
-
 
     input:
     tuple val(meta), path(contigs)
@@ -40,8 +30,6 @@ process AUTOMETA_V1_MAKE_TAXONOMY_TABLE {
     --assembly ${contigs} \
     --processors ${task.cpus} \\
      --db_dir ${db_dir}\\
-    ${options.args} #  e.g. length_cutoff, handled in modules.conf
-
-
+    ${args} #  e.g. length_cutoff, handled in modules.conf
     """
 }

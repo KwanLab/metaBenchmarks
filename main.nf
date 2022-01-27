@@ -1,11 +1,9 @@
 #!/usr/bin/env nextflow
 /*
 ========================================================================================
-    nf-core/benchmark
+    metabenchmark
 ========================================================================================
-    Github : https://github.com/nf-core/benchmark
-    Website: https://nf-co.re/benchmark
-    Slack  : https://nfcore.slack.com/channels/benchmark
+
 ----------------------------------------------------------------------------------------
 */
 
