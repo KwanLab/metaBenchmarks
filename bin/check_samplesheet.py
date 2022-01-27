@@ -7,6 +7,7 @@ import os
 import sys
 import errno
 import argparse
+from typing import Dict, List
 
 
 def parse_args(args=None):
@@ -38,13 +39,42 @@ def print_error(error, context="Line", context_str=""):
     sys.exit(1)
 
 
-# TODO nf-core: Update the check_samplesheet function
-def check_samplesheet(file_in, file_out):
+def write_valid_samplesheet(
+    sample_mapping: Dict[str, List[str]], file_out: str
+) -> None:
+    ## Write validated samplesheet with appropriate columns
+    if not sample_mapping:
+        print_error("No entries to process!", "Check input samplesheet!")
+    out_dir = os.path.dirname(file_out)
+    make_dir(out_dir)
+    delimiter = "," if file_out.endswith(".csv") else "\t"
+    with open(file_out, "w") as fout:
+        fout.write(
+            delimiter.join(["sample", "single_end", "fastq_1", "fastq_2", "assembly"])
+            + "\n"
+        )
+        for sample in sorted(sample_mapping.keys()):
+            ## Check that multiple runs of the same sample are of the same datatype
+            if not all(
+                entry[0] == sample_mapping[sample][0][0] for entry in sample_mapping[sample]
+            ):
+                print_error(
+                    "Multiple runs of a sample must be of the same datatype!",
+                    f"Sample: {sample}",
+                )
+
+            for idx, val in enumerate(sample_mapping[sample]):
+                fout.write(
+                    delimiter.join([f"{sample}_T{idx + 1}"] + val) + "\n"
+                )
+
+
+def check_samplesheet(file_in: str) -> Dict[str, List[str]]:
     """
     This function checks that the samplesheet follows the following structure:
 
-    sample,fastq_1,fastq_2
-    SAMPLE_PE,SAMPLE_PE_RUN1_1.fastq.gz,SAMPLE_PE_RUN1_2.fastq.gz
+    sample,fastq_1,fastq_2,assembly
+    SAMPLE_PE,SAMPLE_PE_RUN1_1.fastq.gz,SAMPLE_PE_RUN1_2.fastq.gz,SAMPLE.fna
     SAMPLE_PE,SAMPLE_PE_RUN2_1.fastq.gz,SAMPLE_PE_RUN2_2.fastq.gz
     SAMPLE_SE,SAMPLE_SE_RUN1_1.fastq.gz,
 
@@ -54,37 +84,41 @@ def check_samplesheet(file_in, file_out):
 
     sample_mapping_dict = {}
     with open(file_in, "r") as fin:
-
+        delimiter = "," if file_in.endswith(".csv") else "\t"
         ## Check header
         MIN_COLS = 2
         # TODO nf-core: Update the column names for the input samplesheet
-        HEADER = ["sample", "fastq_1", "fastq_2"]
-        header = [x.strip('"') for x in fin.readline().strip().split(",")]
+        HEADER = ["sample", "fastq_1", "fastq_2", "assembly"]
+        header = [col.strip('"') for col in fin.readline().strip().split(delimiter)]
         if header[: len(HEADER)] != HEADER:
-            print("ERROR: Please check samplesheet header -> {} != {}".format(",".join(header), ",".join(HEADER)))
+            print(
+                "ERROR: Please check samplesheet header -> {} != {}".format(
+                    ",".join(header), ",".join(HEADER)
+                )
+            )
             sys.exit(1)
 
         ## Check sample entries
         for line in fin:
-            lspl = [x.strip().strip('"') for x in line.strip().split(",")]
+            sample_entries = [entry.strip().strip('"') for entry in line.strip().split(delimiter)]
 
             # Check valid number of columns per row
-            if len(lspl) < len(HEADER):
+            if len(sample_entries) < len(HEADER):
                 print_error(
-                    "Invalid number of columns (minimum = {})!".format(len(HEADER)),
+                    f"Invalid number of columns (minimum = {len(HEADER)})!",
                     "Line",
                     line,
                 )
-            num_cols = len([x for x in lspl if x])
+            num_cols = len([entry for entry in sample_entries if entry])
             if num_cols < MIN_COLS:
                 print_error(
-                    "Invalid number of populated columns (minimum = {})!".format(MIN_COLS),
+                    f"Invalid number of populated columns (minimum = {MIN_COLS})!",
                     "Line",
                     line,
                 )
 
             ## Check sample name entries
-            sample, fastq_1, fastq_2 = lspl[: len(HEADER)]
+            sample, fastq_1, fastq_2, assembly = sample_entries[: len(HEADER)]
             sample = sample.replace(" ", "_")
             if not sample:
                 print_error("Sample entry has not been specified!", "Line", line)
@@ -102,15 +136,15 @@ def check_samplesheet(file_in, file_out):
                         )
 
             ## Auto-detect paired-end/single-end
-            sample_info = []  ## [single_end, fastq_1, fastq_2]
+            sample_info = []  ## [single_end, fastq_1, fastq_2, assembly]
             if sample and fastq_1 and fastq_2:  ## Paired-end short reads
-                sample_info = ["0", fastq_1, fastq_2]
+                sample_info = ["0", fastq_1, fastq_2, assembly]
             elif sample and fastq_1 and not fastq_2:  ## Single-end short reads
-                sample_info = ["1", fastq_1, fastq_2]
+                sample_info = ["1", fastq_1, fastq_2, assembly]
             else:
                 print_error("Invalid combination of columns provided!", "Line", line)
 
-            ## Create sample mapping dictionary = { sample: [ single_end, fastq_1, fastq_2 ] }
+            ## Create sample mapping dictionary = { sample: [ single_end, fastq_1, fastq_2, assembly ] }
             if sample not in sample_mapping_dict:
                 sample_mapping_dict[sample] = [sample_info]
             else:
@@ -119,27 +153,15 @@ def check_samplesheet(file_in, file_out):
                 else:
                     sample_mapping_dict[sample].append(sample_info)
 
-    ## Write validated samplesheet with appropriate columns
-    if len(sample_mapping_dict) > 0:
-        out_dir = os.path.dirname(file_out)
-        make_dir(out_dir)
-        with open(file_out, "w") as fout:
-            fout.write(",".join(["sample", "single_end", "fastq_1", "fastq_2"]) + "\n")
-            for sample in sorted(sample_mapping_dict.keys()):
-
-                ## Check that multiple runs of the same sample are of the same datatype
-                if not all(x[0] == sample_mapping_dict[sample][0][0] for x in sample_mapping_dict[sample]):
-                    print_error("Multiple runs of a sample must be of the same datatype!", "Sample: {}".format(sample))
-
-                for idx, val in enumerate(sample_mapping_dict[sample]):
-                    fout.write(",".join(["{}_T{}".format(sample, idx + 1)] + val) + "\n")
-    else:
-        print_error("No entries to process!", "Samplesheet: {}".format(file_in))
+    return sample_mapping_dict
 
 
 def main(args=None):
     args = parse_args(args)
-    check_samplesheet(args.FILE_IN, args.FILE_OUT)
+    sample_mapping = check_samplesheet(args.FILE_IN, args.FILE_OUT)
+    if not sample_mapping:
+        print_error("No entries to process!", f"Samplesheet: {args.FILE_IN}")
+    write_valid_samplesheet(sample_mapping, args.FILE_OUT)
 
 
 if __name__ == "__main__":

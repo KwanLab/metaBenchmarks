@@ -6,12 +6,9 @@
 
 def summary_params = NfcoreSchema.paramsSummaryMap(workflow, params)
 
-// Validate input parameters
-WorkflowBenchmark.initialise(params, log)
-
 // TODO nf-core: Add all file path parameters for the pipeline to the list below
 // Check input path parameters to see if they exist
-def checkPathParamList = [ params.input, params.multiqc_config, params.fasta ]
+def checkPathParamList = [ params.input, params.multiqc_config ]
 for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
 
 // Check mandatory parameters
@@ -39,6 +36,10 @@ def modules = params.modules.clone()
 // MODULE: Local to the pipeline
 //
 include { GET_SOFTWARE_VERSIONS } from '../modules/local/get_software_versions' addParams( options: [publish_files : ['tsv':'']] )
+include { MAXBIN2 } from '../modules/local/maxbin2' addParams( options: [:] )
+include { METABAT2 } from '../modules/local/metabat2' addParams( options: [:] )
+include { MYCC } from '../modules/local/mycc' addParams( options: [:] )
+include { PHYLOPYTHIASPLUS } from '../modules/local/phylopythiasplus' addParams( options: [:] )
 
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
@@ -121,6 +122,23 @@ workflow BENCHMARK {
     )
     multiqc_report       = MULTIQC.out.report.toList()
     ch_software_versions = ch_software_versions.mix(MULTIQC.out.version.ifEmpty(null))
+
+    //
+    // Taxon-profiling Modules
+    //
+    // KRAKEN2(...)
+    // PHYLOPYTHIASPLUS(...)
+    //
+    // Clustering Modules
+    //
+
+    // COMBAK: Implement assembly emit in INPUT_CHECK
+    // COMABK: Check inputs for these modules for setting appropriate
+    // channels
+    // MYCC(INPUT_CHECK.out.assembly)
+    MAXBIN2(INPUT_CHECK.out.assembly)
+    METABAT2(INPUT_CHECK.out.assembly)
+
 }
 
 /*

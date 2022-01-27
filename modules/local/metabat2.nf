@@ -38,13 +38,12 @@ process METABAT2 {
         !{bam}
     
     metabat2 \\
-        -t !{task.cpus} \\
-        -i !{assembly} \\
-        -a depth.txt  \\
-        -o bins/!{assembly.baseName} \\
-        -m !{params.length_cutoff} \\
+        --numThreads !{task.cpus} \\
+        --inFile !{assembly} \\
+        --abdFile depth.txt  \\
+        --outFile bins/!{assembly.baseName} \\
         --unbinned \\
-        --seed !{params.seed} \\
+        --onlyLabel \\
         !{options.args}
     
 
@@ -61,6 +60,5 @@ process METABAT2 {
             echo "$(grep ">" $bin | sed 's/^.//' | sed -r "s|$|\t$cluster|")" >> binning.tsv
 
     done
-
     '''
 }
