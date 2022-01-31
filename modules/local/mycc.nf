@@ -10,33 +10,32 @@ process MYCC {
     }
 
     input:
-    tuple val(meta), path(metagenome)
-    path(coverages)
+        tuple val(meta), path(assembly), path(coverage)
 
     output:
-    tuple val(meta), path("*.fasta"), emit: bins
-    path "*.tsv"                    , emit: binning
-    path "*.version.txt"            , emit: version
+        tuple val(meta), path("*.fasta"), emit: bins
+        path "*.tsv"                    , emit: binning
+        path "*.version.txt"            , emit: version
 
     script:
-    def args = task.ext.args ?: ''
-    def software = getSoftwareName(task.process)
-    def prefix   = options.suffix ? "${meta.id}${options.suffix}" : "${meta.id}"
-    """
+        def args = task.ext.args ?: ''
+        def software = getSoftwareName(task.process)
+        def prefix   = options.suffix ? "${meta.id}${options.suffix}" : "${meta.id}"
+        """
         # Check coverages table for header and reformat if necessary
-        if grep -q 'contig'$'\t''coverage' $coverages
+        if grep -q 'contig'$'\t''coverage' $coverage
         then 
-        echo "Found header, removing...";
-        sed -i 1d $coverages
+            echo "Found header, removing...";
+            sed -i 1d $coverage
         else
-        echo "No header found";
+            echo "No header found";
         fi
 
         # NOTE: MyCC can NOT handle gzipped assemblies
         # Perform MyCC binning
         MyCC.py \\
-            $metagenome \\
-            -a $coverages \\
+            $assembly \\
+            -a $coverage \\
             $args
 
 
@@ -57,5 +56,5 @@ process MYCC {
 
         # MyCC does not have a version so this will be manually created here
         echo "1.0.0" > ${software}.version.txt
-    """
+        """
 }

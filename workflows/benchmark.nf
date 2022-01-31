@@ -33,7 +33,18 @@ ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multi
 //
 include { GET_SOFTWARE_VERSIONS } from '../modules/local/get_software_versions'
 include { INPUT_CHECK } from '../subworkflows/local/input_check' addParams( options: [:] )
-include { AUTOMETA_V1 } from '../subworkflows/local/autometa_v1' addParams( options: [:] )
+
+// Taxon-profilers
+include { KRAKEN2 } from '../modules/local/kraken2' addParams( options: [:] )
+include { MMSEQS2 } from '../modules/local/mmseqs2' addParams( options: [:] )
+include { DIAMOND } from '../modules/local/diamond' addParams( options: [:] )
+include { AUTOMETA_V1_MAKE_TAXONOMY_TABLE } from '../modules/local/autometa_v1_make_taxonomy_table.nf' addParams( options: [:] )
+
+// Binners
+include { AUTOMETA_V1_BINNING } from '../modules/local/autometa_v1_binning.nf' addParams( options: [:] )
+include { MAXBIN2 } from '../modules/local/maxbin2.nf' addParams( options: [:] )
+include { METABAT2 } from '../modules/local/metabat2.nf' addParams( options: [:] )
+include { MYCC } from '../modules/local/mycc.nf' addParams( options: [:] )
 
 /*
 ========================================================================================
@@ -69,14 +80,37 @@ workflow BENCHMARK {
     ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
 
     //
-    // MODULE: Run FastQC
+    // Run taxon profiling
     //
+    taxon_profiling_ch = INPUT_CHECK.out.taxon_profiling
+
+    KRAKEN2(taxon_profiling_ch)
+    MMSEQS2(taxon_profiling_ch)
+    AUTOMETA_TAXON_PROFILING_V1(taxon_profiling_ch) 
+    AUTOMETA_TAXON_PROFILING_V2(taxon_profiling_ch) 
+    DIAMOND(taxon_profiling_ch)
+
+    //
+    // Run binning
+    //
+    binning_ch = INPUT_CHECK.out.binning
+
+    // Binners using cov table
+    MYCC(binning_ch)
+    MAXBIN2(binning_ch)
+    AUTOMETA_V1_BINNING(binning_ch)
+    AUTOMETA_V2_BINNING(binning_ch)
+    
+    // Binners using alignments.bam
+    METABAT2(binning_ch)
+    VAMB(binning_ch)
+
+
+
     FASTQC (
         INPUT_CHECK.out.reads
     )
     ch_versions = ch_versions.mix(FASTQC.out.versions.first())
-
-    AUTOMETA_V1(#TODO: ADD INPUTS)
 
     //
     // MODULE: Pipeline reporting

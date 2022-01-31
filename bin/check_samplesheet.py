@@ -1,6 +1,12 @@
 #!/usr/bin/env python
-
-# TODO nf-core: Update the script to check the samplesheet
+# Check the samplesheet for valid inputs
+# Checks for
+# 1. Whether minimum required files exist
+# 2. Whether provided sample IDs are unique
+# 3. Whether appropriate parameter combinations were provided
+#   - if coverage is to be determined from read alignments, reads must also be provided
+#   - if a path to a coverage table is already provided in the samplesheet
+#
 # This script is based on the example at: https://raw.githubusercontent.com/nf-core/test-datasets/viralrecon/samplesheet/samplesheet_test_illumina_amplicon.csv
 
 import os
@@ -11,7 +17,7 @@ from typing import Dict, List
 
 
 def parse_args(args=None):
-    Description = "Reformat nf-core/benchmark samplesheet file and check its contents."
+    Description = "Reformat nf-core/autometa samplesheet file and check its contents."
     Epilog = "Example usage: python check_samplesheet.py <FILE_IN> <FILE_OUT>"
 
     parser = argparse.ArgumentParser(description=Description, epilog=Epilog)
@@ -20,7 +26,7 @@ def parse_args(args=None):
     return parser.parse_args(args)
 
 
-def make_dir(path):
+def make_dir(path: str) -> None:
     if len(path) > 0:
         try:
             os.makedirs(path)
@@ -29,139 +35,157 @@ def make_dir(path):
                 raise exception
 
 
-def print_error(error, context="Line", context_str=""):
-    error_str = "ERROR: Please check samplesheet -> {}".format(error)
+def print_error(error: str, context: str = "Line", context_str: str = "") -> None:
+    error_str = f"ERROR: Please check samplesheet -> {error}"
     if context != "" and context_str != "":
-        error_str = "ERROR: Please check samplesheet -> {}\n{}: '{}'".format(
-            error, context.strip(), context_str.strip()
-        )
+        error_str = f"ERROR: Please check samplesheet -> {error}\n{context.strip()}: '{context_str.strip()}'"
     print(error_str)
     sys.exit(1)
-
-
-def write_valid_samplesheet(
-    sample_mapping: Dict[str, List[str]], file_out: str
-) -> None:
-    ## Write validated samplesheet with appropriate columns
-    if not sample_mapping:
-        print_error("No entries to process!", "Check input samplesheet!")
-    out_dir = os.path.dirname(file_out)
-    make_dir(out_dir)
-    delimiter = "," if file_out.endswith(".csv") else "\t"
-    with open(file_out, "w") as fout:
-        fout.write(
-            delimiter.join(["sample", "single_end", "fastq_1", "fastq_2", "assembly"])
-            + "\n"
-        )
-        for sample in sorted(sample_mapping.keys()):
-            ## Check that multiple runs of the same sample are of the same datatype
-            if not all(
-                entry[0] == sample_mapping[sample][0][0] for entry in sample_mapping[sample]
-            ):
-                print_error(
-                    "Multiple runs of a sample must be of the same datatype!",
-                    f"Sample: {sample}",
-                )
-
-            for idx, val in enumerate(sample_mapping[sample]):
-                fout.write(
-                    delimiter.join([f"{sample}_T{idx + 1}"] + val) + "\n"
-                )
 
 
 def check_samplesheet(file_in: str) -> Dict[str, List[str]]:
     """
     This function checks that the samplesheet follows the following structure:
 
-    sample,fastq_1,fastq_2,assembly
-    SAMPLE_PE,SAMPLE_PE_RUN1_1.fastq.gz,SAMPLE_PE_RUN1_2.fastq.gz,SAMPLE.fna
-    SAMPLE_PE,SAMPLE_PE_RUN2_1.fastq.gz,SAMPLE_PE_RUN2_2.fastq.gz
-    SAMPLE_SE,SAMPLE_SE_RUN1_1.fastq.gz,
+    sample,fastq_1,fastq_2,assembly,coverage_tab,alignments
+    example_1,fwd_reads.fastq.gz,rev_reads.fq.gz,assembly.fasta,,
+    example_2,fwd_reads.fastq.gz,rev_reads.fastq.gz,assembly.fasta,coverage.tsv,
+    example_3,fwd_reads.fastq.gz,rev_reads.fastq.gz,assembly.fasta,,alignments.bam
 
     For an example see:
     https://raw.githubusercontent.com/nf-core/test-datasets/viralrecon/samplesheet/samplesheet_test_illumina_amplicon.csv
     """
 
-    sample_mapping_dict = {}
-    with open(file_in, "r") as fin:
-        delimiter = "," if file_in.endswith(".csv") else "\t"
+    samples = {}
+    min_col_names = ["sample", "assembly", "fastq_1", "fastq_2"]
+    min_num_cols = len(min_col_names)
+    req_header_cols = [
+        "sample",
+        "assembly",
+        "fastq_1",
+        "fastq_2",
+        "coverage_tab",
+        "alignments",
+    ]
+    num_required_cols = len(req_header_cols)
+    with open(file_in, "r") as fh:
         ## Check header
-        MIN_COLS = 2
-        # TODO nf-core: Update the column names for the input samplesheet
-        HEADER = ["sample", "fastq_1", "fastq_2", "assembly"]
-        header = [col.strip('"') for col in fin.readline().strip().split(delimiter)]
-        if header[: len(HEADER)] != HEADER:
+        header = fh.readline().strip()
+        header_cols = [header_col.strip('"') for header_col in header.split(",")]
+        if header_cols[:num_required_cols] != req_header_cols:
             print(
-                "ERROR: Please check samplesheet header -> {} != {}".format(
-                    ",".join(header), ",".join(HEADER)
-                )
+                f"ERROR: Please check samplesheet header -> {','.join(header_cols)} != {','.join(req_header_cols)}"
             )
             sys.exit(1)
 
         ## Check sample entries
-        for line in fin:
-            sample_entries = [entry.strip().strip('"') for entry in line.strip().split(delimiter)]
+        for line in fh:
+            sample_cols = [
+                sample_col.strip().strip('"') for sample_col in line.strip().split(",")
+            ]
 
             # Check valid number of columns per row
-            if len(sample_entries) < len(HEADER):
+            num_cols = len([sample_col for sample_col in sample_cols if sample_col])
+            if num_cols < min_num_cols:
                 print_error(
-                    f"Invalid number of columns (minimum = {len(HEADER)})!",
-                    "Line",
-                    line,
-                )
-            num_cols = len([entry for entry in sample_entries if entry])
-            if num_cols < MIN_COLS:
-                print_error(
-                    f"Invalid number of populated columns (minimum = {MIN_COLS})!",
+                    f"Invalid number of populated columns (minimum = {min_num_cols})!",
                     "Line",
                     line,
                 )
 
+            if len(sample_cols) != num_required_cols:
+                print_error(
+                    f"Invalid number of columns (required = {num_required_cols})! Check that you have the correct number of commas and retry",
+                    "Line",
+                    line,
+                )
             ## Check sample name entries
-            sample, fastq_1, fastq_2, assembly = sample_entries[: len(HEADER)]
+            (
+                sample,
+                assembly,
+                fastq_1,
+                fastq_2,
+                coverage_tab,
+                alignments,
+            ) = sample_cols
+
             sample = sample.replace(" ", "_")
             if not sample:
+                print_error("Sample entry has not been specified!", "Line", line)
+            if not assembly:
                 print_error("Sample entry has not been specified!", "Line", line)
 
             ## Check FastQ file extension
             for fastq in [fastq_1, fastq_2]:
-                if fastq:
-                    if fastq.find(" ") != -1:
-                        print_error("FastQ file contains spaces!", "Line", line)
-                    if not fastq.endswith(".fastq.gz") and not fastq.endswith(".fq.gz"):
-                        print_error(
-                            "FastQ file does not have extension '.fastq.gz' or '.fq.gz'!",
-                            "Line",
-                            line,
-                        )
+                if not fastq:
+                    print_error("FastQ file not found!", "Line", line)
+                if fastq.find(" ") != -1:
+                    print_error("FastQ file contains spaces!", "Line", line)
+                if not fastq.endswith(".fastq.gz") and not fastq.endswith(".fq.gz"):
+                    print_error(
+                        "FastQ file does not have extension '.fastq.gz' or '.fq.gz'!",
+                        "Line",
+                        line,
+                    )
 
+            # NOTE: An empty string will fail with the file(...) method for groovy.. So we pass in "0" here
+            # to be checked later with file(...).exists()
+            # Same goes for the fastq_* files
+            coverage_tab = coverage_tab if coverage_tab else "0"
+            alignments = alignments if alignments else "0"
             ## Auto-detect paired-end/single-end
-            sample_info = []  ## [single_end, fastq_1, fastq_2, assembly]
-            if sample and fastq_1 and fastq_2:  ## Paired-end short reads
-                sample_info = ["0", fastq_1, fastq_2, assembly]
-            elif sample and fastq_1 and not fastq_2:  ## Single-end short reads
-                sample_info = ["1", fastq_1, fastq_2, assembly]
-            else:
-                print_error("Invalid combination of columns provided!", "Line", line)
+            ## {"sample": [ assembly, fastq_1, fastq_2, coverage_tab, alignments ]}
+            sample_info = [
+                assembly,
+                fastq_1,
+                fastq_2,
+                coverage_tab,
+                alignments,
+            ]
 
-            ## Create sample mapping dictionary = { sample: [ single_end, fastq_1, fastq_2, assembly ] }
-            if sample not in sample_mapping_dict:
-                sample_mapping_dict[sample] = [sample_info]
-            else:
-                if sample_info in sample_mapping_dict[sample]:
-                    print_error("Samplesheet contains duplicate rows!", "Line", line)
-                else:
-                    sample_mapping_dict[sample].append(sample_info)
+            ## Create sample mapping dictionary = { sample: [ assembly, fastq_1, fastq_2, coverage_tab, alignments ] }
+            if sample in samples:
+                print_error("Samplesheet contains duplicate samples!", "Line", line)
+            samples[sample] = sample_info
 
-    return sample_mapping_dict
+    if not samples:
+        print_error("No entries to process!", f"Samplesheet: {file_in}")
+
+    return samples
+
+
+def write_valid_samplesheet(samples: Dict[str, List[str]], file_out: str) -> None:
+    ## Write validated samplesheet with appropriate columns
+    ## Write validated samplesheet with appropriate columns
+    sample_lines = ""
+    for sample, sample_info in samples.items():
+        sample_info_line = ",".join(sample_info)
+        sample_line = f"{sample},{sample_info_line}\n"
+        sample_lines += sample_line
+    out_dir = os.path.dirname(file_out)
+    make_dir(out_dir)
+    header = (
+        ",".join(
+            [
+                "sample",
+                "assembly",
+                "fastq_1",
+                "fastq_2",
+                "coverage_tab",
+                "alignments",
+            ]
+        )
+        + "\n"
+    )
+    with open(file_out, "w") as outfh:
+        outfh.write(header)
+        outfh.write(sample_lines)
 
 
 def main(args=None):
     args = parse_args(args)
-    sample_mapping = check_samplesheet(args.FILE_IN, args.FILE_OUT)
-    if not sample_mapping:
-        print_error("No entries to process!", f"Samplesheet: {args.FILE_IN}")
-    write_valid_samplesheet(sample_mapping, args.FILE_OUT)
+    samples = check_samplesheet(args.FILE_IN)
+    write_valid_samplesheet(samples, args.FILE_OUT)
 
 
 if __name__ == "__main__":

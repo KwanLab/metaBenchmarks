@@ -13,27 +13,27 @@ process KRAKEN2 {
     }
 
     input:
-    tuple val(meta), path(contigs)
-    path  db
+        tuple val(meta), path(assembly)
+        path(db)
 
     output:
-    tuple val(meta), path('*report.txt')   , emit: report
-    tuple val(meta), path('*output.txt')   , emit: output
-    path "*.version.txt"                   , emit: version
+        tuple val(meta), path('*report.txt')   , emit: report
+        tuple val(meta), path('*output.txt')   , emit: output
+        path "*.version.txt"                   , emit: version
 
     script:
-    def args = task.ext.args ?: ''
-    def software = getSoftwareName(task.process)
-    def prefix   = options.suffix ? "${meta.id}${options.suffix}" : "${meta.id}"
-    """
-    kraken2 \\
-        --db $db \\
-        ${args} \\
-        --threads $task.cpus \\
-        --output ${prefix}.kraken2.output.txt \\
-        --report ${prefix}.kraken2.report.txt \\
-        $contigs
+        def args = task.ext.args ?: ''
+        def software = getSoftwareName(task.process)
+        def prefix   = options.suffix ? "${meta.id}${options.suffix}" : "${meta.id}"
+        """
+        kraken2 \\
+            --db $db \\
+            ${args} \\
+            --threads $task.cpus \\
+            --output ${prefix}.kraken2.output.txt \\
+            --report ${prefix}.kraken2.report.txt \\
+            $assembly
 
-    echo \$(kraken2 --version 2>&1) | sed 's/^.*Kraken version //; s/ .*\$//' > ${software}.version.txt
-    """
+        echo \$(kraken2 --version 2>&1) | sed 's/^.*Kraken version //; s/ .*\$//' > ${software}.version.txt
+        """
 }

@@ -1,16 +1,19 @@
 
 # Creating modules
+
 ## Background info
+
 A lot of documentation exists but is directed mainly concerned with contributing new modules to the nf-core/modules repository.
-    - https://nf-co.re/developers/tutorials/dsl2_modules_tutorial
-    - https://github.com/nf-core/modules
+    - <https://nf-co.re/developers/tutorials/dsl2_modules_tutorial>
+    - <https://github.com/nf-core/modules>
 
 I think the best resource for learning about the structure of modules and how they incorporate into workflows is the video
-https://youtu.be/ggGGhTMgyHI?t=1172   , starting at 19:30 
+<https://youtu.be/ggGGhTMgyHI?t=1172>   , starting at 19:30
 
-It also looks like an additional helpful video will be released on September 7, 2021 : https://nf-co.re/events/2021/bytesize-19-dsl2-pipeline-starter
+It also looks like an additional helpful video will be released on September 7, 2021 : <https://nf-co.re/events/2021/bytesize-19-dsl2-pipeline-starter>
 
 ## Creating local modules for benchmarking
+
 To add a new local module
 
 Clone this repo and create a new branch to work on
@@ -18,6 +21,7 @@ Clone this repo and create a new branch to work on
 Install `nf-core` using conda:
 
 e.g. both nf-core and nextflow
+
 ```
 conda create --name nf-core python=3.7 nf-core nextflow
 ```
@@ -45,7 +49,6 @@ nf-core modules create
 ```
 
 When prompted for `Name of tool/subtool:`, if, for example, you're creating a DIAMOND BLASTp module you would enter `diamond` when prompted.
-
 
 Set all benchmarking processes `Process resource label` as `process_high`. This will allow providing all benchmark processes the same resources.
 
@@ -112,14 +115,15 @@ autometa-benchmark \
 Type: Binning of Contigs
 
 Website:
-https://github.com/KwanLab/Autometa/releases/tag/1.0.2
-
+<https://github.com/KwanLab/Autometa/releases/tag/1.0.2>
 
 Inputs:
-  - Nucleotide contigs
+
+- Nucleotide contigs
 Outputs:
 
 Code to run individual module:
+
 ```{bash}
 
 ```
@@ -129,11 +133,12 @@ Code to run individual module:
 Type: Binning of Contigs
 
 Website:
-https://sourceforge.net/projects/maxbin2/
+<https://sourceforge.net/projects/maxbin2/>
 
 Inputs:
-  - Nucleotide contigs
-  - Reads files (forward and reverse, used to calculate abundance data)
+
+- Nucleotide contigs
+- Reads files (forward and reverse, used to calculate abundance data)
 
 Outputs:
 maxbin2_output.001.fasta
@@ -151,28 +156,14 @@ maxbin2_output.summary
 maxbin2_output.tooshort
 
 Code to run individual module (to run a module test script, cd to metaBenchmarks/ and run the test nextflow file from there):
+
 ```{bash}
 nextflow run modules/local/tests/maxbin2_test.nf
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
 ---
-# nf-core template readme:
 
-
-
-
+# nf-core template readme
 
 # ![nf-core/benchmark](docs/images/nf-core-benchmark_logo.png)
 
@@ -204,8 +195,28 @@ On release, automated continuous integration tests run the pipeline on a full-si
 
 <!-- TODO nf-core: Fill in short bullet-pointed list of the default steps in the pipeline -->
 
-1. Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))
-2. Present QC for raw reads ([`MultiQC`](http://multiqc.info/))
+- Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))
+- Present QC for raw reads ([`MultiQC`](http://multiqc.info/))
+- Taxon-profiling
+
+    | module      | benchmark      | fwd_reads | rev_reads | assembly | coverage.tsv  | alignments.bam |
+    |-------------|----------------|-----------|-----------|----------|---------------|----------------|
+    | Kraken2     | taxon-profiler | N         | N         | Y        | N             |       N        |
+    | MMseqs2     | taxon-profiler | N         | N         | Y        | N             |       N        |
+    | Autometa v1 | taxon-profiler | N         | N         | Y        | N             |       N        |
+    | Autometa v2 | taxon-profiler | N         | N         | Y        | N             |       N        |
+    | Diamond     | taxon-profiler | N         | N         | Y        | N             |       N        |
+
+- Binning
+
+    | module      | benchmark      | fwd_reads | rev_reads | assembly | coverage.tsv  | alignments.bam |
+    |-------------|----------------|-----------|-----------|----------|---------------|----------------|
+    | MyCC        | binner         | N         | N         | Y        | Y (no header) |       N        |
+    | MaxBin2     | binner         | (Y)       | (Y)       | Y        | Y (no header) |       N        |
+    | MetaBat2    | binner         | N         | N         | Y        | N             |       Y        |
+    | Autometa v1 | binner         | N         | N         | Y        | Y             |       N        |
+    | Autometa v2 | binner         | N         | N         | Y        | Y             |       N        |
+    | VAMB        | binner         | N         | N         | Y        | N             |       Y        |
 
 ## Quick Start
 
@@ -219,9 +230,9 @@ On release, automated continuous integration tests run the pipeline on a full-si
     nextflow run nf-core/benchmark -profile test,<docker/singularity/podman/shifter/charliecloud/conda/institute>
     ```
 
-    > * Please check [nf-core/configs](https://github.com/nf-core/configs#documentation) to see if a custom config file to run nf-core pipelines already exists for your Institute. If so, you can simply use `-profile <institute>` in your command. This will enable either `docker` or `singularity` and set the appropriate execution settings for your local compute environment.
-    > * If you are using `singularity` then the pipeline will auto-detect this and attempt to download the Singularity images directly as opposed to performing a conversion from Docker images. If you are persistently observing issues downloading Singularity images directly due to timeout or network issues then please use the `--singularity_pull_docker_container` parameter to pull and convert the Docker image instead. Alternatively, it is highly recommended to use the [`nf-core download`](https://nf-co.re/tools/#downloading-pipelines-for-offline-use) command to pre-download all of the required containers before running the pipeline and to set the [`NXF_SINGULARITY_CACHEDIR` or `singularity.cacheDir`](https://www.nextflow.io/docs/latest/singularity.html?#singularity-docker-hub) Nextflow options to be able to store and re-use the images from a central location for future pipeline runs.
-    > * If you are using `conda`, it is highly recommended to use the [`NXF_CONDA_CACHEDIR` or `conda.cacheDir`](https://www.nextflow.io/docs/latest/conda.html) settings to store the environments in a central location for future pipeline runs.
+    > - Please check [nf-core/configs](https://github.com/nf-core/configs#documentation) to see if a custom config file to run nf-core pipelines already exists for your Institute. If so, you can simply use `-profile <institute>` in your command. This will enable either `docker` or `singularity` and set the appropriate execution settings for your local compute environment.
+    > - If you are using `singularity` then the pipeline will auto-detect this and attempt to download the Singularity images directly as opposed to performing a conversion from Docker images. If you are persistently observing issues downloading Singularity images directly due to timeout or network issues then please use the `--singularity_pull_docker_container` parameter to pull and convert the Docker image instead. Alternatively, it is highly recommended to use the [`nf-core download`](https://nf-co.re/tools/#downloading-pipelines-for-offline-use) command to pre-download all of the required containers before running the pipeline and to set the [`NXF_SINGULARITY_CACHEDIR` or `singularity.cacheDir`](https://www.nextflow.io/docs/latest/singularity.html?#singularity-docker-hub) Nextflow options to be able to store and re-use the images from a central location for future pipeline runs.
+    > - If you are using `conda`, it is highly recommended to use the [`NXF_CONDA_CACHEDIR` or `conda.cacheDir`](https://www.nextflow.io/docs/latest/conda.html) settings to store the environments in a central location for future pipeline runs.
 
 4. Start running your own analysis!
 

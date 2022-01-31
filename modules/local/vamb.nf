@@ -11,21 +11,23 @@ process VAMB {
     }
 
     input:
-    tuple val(meta), path(fasta), path(bam)
+    tuple val(meta), path(assembly), path(bam)
 
     output:
-    tuple val(meta), path("*"), emit: bam
+    tuple val(meta), path("*"), emit: binning
 
     script:
     def args = task.ext.args ?: ''
+    def args2 = task.ext.args2 ?: ''
+    def args3 = task.ext.args3 ?: ''
     def prefix   = options.suffix ? "${meta.id}${options.suffix}" : "${meta.id}"
     """
     vamb \\
         --outdir . \\
-        --fasta ${fasta} \\
+        --fasta ${assembly} \\
         --bamfiles ${bam} \\
-        -o C \\
-        --minfasta 200000
-
+        $args \\
+        $args2 \\
+        $args3
     """
 }

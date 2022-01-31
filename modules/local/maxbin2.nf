@@ -16,8 +16,7 @@ process MAXBIN2 {
     """
     run_MaxBin.pl \\
         -contig ${contig} \\
-        -reads ${fwd_reads} \\
-        -reads2 ${rev_reads} \\
+        -abund ${coverage} \\
         -out maxbin2_output \\
         -thread ${task.cpus} \\
         ${options.args}
