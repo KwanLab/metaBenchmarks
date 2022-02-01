@@ -15,6 +15,6 @@ workflow PREPARE_COVERAGE_INPUT_FORMATS {
         
     emit:
         bam = MINIMAP2.out.bam
-        depth = JGI_SUMMARIZE.out.depth
-        tab = JGI_SUMMARIZE.out.table
+        depth = JGI_SUMMARIZE_BAM_CONTIG_DEPTHS.out.depth
+        tab = AUTOMETA_COVERAGE.out.table
 }
