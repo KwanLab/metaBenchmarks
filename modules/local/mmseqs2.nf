@@ -19,6 +19,7 @@ process MMSEQS2 {
         def prefix = task.ext.prefix ?: "${meta.id}"
         """
         TODO: Add mmseqs2 params...
+        # To see all args: docker run --rm -it soedinglab/mmseqs2 mmseqs easy-taxonomy -h
         mmseqs easy-taxonomy
 
         cat <<-END_VERSIONS > versions.yml
