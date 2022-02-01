@@ -17,9 +17,10 @@ process KRAKEN2 {
         path(db)
 
     output:
-        tuple val(meta), path('*report.txt')   , emit: report
-        tuple val(meta), path('*output.txt')   , emit: output
-        path "*.version.txt"                   , emit: version
+        tuple val(meta), path('*report.txt')              , emit: report
+        tuple val(meta), path('*output.txt')              , emit: output
+        tuple val(meta), path('*.kraken2.taxonomy.tsv')   , emit: taxon_profiling
+        path "*.version.txt"                              , emit: version
 
     script:
         def args = task.ext.args ?: ''
@@ -34,6 +35,7 @@ process KRAKEN2 {
             --report ${prefix}.kraken2.report.txt \\
             $assembly
 
+        format_kraken2_output.sh ${prefix}.kraken2.output.txt ${prefix}.kraken2.taxonomy.tsv
         echo \$(kraken2 --version 2>&1) | sed 's/^.*Kraken version //; s/ .*\$//' > ${software}.version.txt
         """
 }

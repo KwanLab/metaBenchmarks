@@ -44,6 +44,33 @@
                 }
             }
         },
+        "taxon_profiling_databases": {
+            "title": "Taxon-profiling Databases",
+            "type": "object",
+            "fa_icon": "fas fa-terminal",
+            "description": "Define where the pipeline should find taxon-profiling databases.",
+            "required": [
+                "kraken2_db",
+                "ncbi_db",
+                ""
+            ],
+            "properties": {
+                "kraken2_db": {
+                    "type": "string",
+                    "format": "dir-path",
+                    "description": "Path to kraken2 database.",
+                    "help_text": "TODO: Add link to download/setup kraken2 database",
+                    "fa_icon": "fas fa-file-csv"
+                },
+                "ncbi_db": {
+                    "type": "string",
+                    "format": "dir-path",
+                    "description": "Path to NCBI database directory.",
+                    "help_text": "TODO: Add link to download/setup NCBI databases",
+                    "fa_icon": "fas fa-file-csv"
+                }
+            }
+        },
         "institutional_config_options": {
             "title": "Institutional config options",
             "type": "object",

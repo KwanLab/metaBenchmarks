@@ -33,12 +33,13 @@ ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multi
 //
 include { GET_SOFTWARE_VERSIONS } from '../modules/local/get_software_versions'
 include { INPUT_CHECK } from '../subworkflows/local/input_check' addParams( options: [:] )
+include { PREPARE_COVERAGE_INPUT_FORMATS as PREP_COV_INPUTS } from '../subworkflows/local/input_check' addParams( options: [:] )
 
 // Taxon-profilers
 include { KRAKEN2 } from '../modules/local/kraken2' addParams( options: [:] )
 include { MMSEQS2 } from '../modules/local/mmseqs2' addParams( options: [:] )
 include { DIAMOND } from '../modules/local/diamond' addParams( options: [:] )
-include { AUTOMETA_V1_MAKE_TAXONOMY_TABLE } from '../modules/local/autometa_v1_make_taxonomy_table.nf' addParams( options: [:] )
+include { AUTOMETA_V1_MAKE_TAXONOMY_TABLE as AUTOMETA_TAXON_PROFILING_V1 } from '../modules/local/autometa_v1_make_taxonomy_table.nf' addParams( options: [:] )
 
 // Binners
 include { AUTOMETA_V1_BINNING } from '../modules/local/autometa_v1_binning.nf' addParams( options: [:] )
@@ -79,31 +80,43 @@ workflow BENCHMARK {
     )
     ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
 
+    // Get paths to taxon-profiling databases
+    // file("/media/bigdrive1/Databases/kraken2/kraken2_db")
+    kraken2_db = file(params.kraken2_db)
+    ncbi_db = file(params.ncbi_db)
+    
     //
     // Run taxon profiling
     //
     taxon_profiling_ch = INPUT_CHECK.out.taxon_profiling
-
-    KRAKEN2(taxon_profiling_ch)
-    MMSEQS2(taxon_profiling_ch)
-    AUTOMETA_TAXON_PROFILING_V1(taxon_profiling_ch) 
-    AUTOMETA_TAXON_PROFILING_V2(taxon_profiling_ch) 
-    DIAMOND(taxon_profiling_ch)
+    KRAKEN2(taxon_profiling_ch, kraken2_db)
+    MMSEQS2(taxon_profiling_ch, mmseqs2_db)
+    AUTOMETA_TAXON_PROFILING_V1(taxon_profiling_ch, ncbi_db)
+    AUTOMETA_TAXON_PROFILING_V2(taxon_profiling_ch, ncbi_db)
+    DIAMOND(taxon_profiling_ch, ncbi_db)
 
     //
     // Run binning
     //
-    binning_ch = INPUT_CHECK.out.binning
+    PREP_COV_INPUTS(
+        INPUT_CHECK.out.binning
+    )
+    
+    binning_tab_ch = PREP_COV_INPUTS.out.table
+    binning_bam_ch = PREP_COV_INPUTS.out.bam
 
     // Binners using cov table
-    MYCC(binning_ch)
-    MAXBIN2(binning_ch)
-    AUTOMETA_V1_BINNING(binning_ch)
-    AUTOMETA_V2_BINNING(binning_ch)
+    MYCC(binning_tab_ch)
+    MAXBIN2(binning_tab_ch)
+    AUTOMETA_V1_BINNING(binning_tab_ch)
+    AUTOMETA_V2_BINNING(binning_tab_ch)
     
     // Binners using alignments.bam
-    METABAT2(binning_ch)
-    VAMB(binning_ch)
+    binning_ch
+        .join(PREP_COV_INPUTS.out.depth)
+        .set{metabat2_ch}
+    METABAT2(metabat2_ch)
+    VAMB(binning_bam_ch)
 
 
 

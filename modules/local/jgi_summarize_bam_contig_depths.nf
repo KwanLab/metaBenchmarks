@@ -1,4 +1,4 @@
-process METABAT2 {
+process JGI_SUMMARIZE_BAM_CONTIG_DEPTHS {
     tag "$meta.id"
     label 'process_high'
 
@@ -10,13 +10,12 @@ process METABAT2 {
     }
 
     input:
-        tuple val(meta), path(assembly), path(depth)
+        tuple val(meta), path(bam)
 
     output:
-        tuple val(meta), path("metabat2/*.fa"),          emit: bins
-        tuple val(meta), path("depth.txt"),              emit: depth
-        tuple val(meta), path("*.metabat2.binning.tsv"), emit: binning
-        path("*.version.txt"), emit: version
+        tuple val(meta), path("depth.txt"), emit: depth
+        path("*.version.txt"),              emit: version
+
 
     // See https://seqera.io/training/#_script_parameters
     script:
@@ -24,16 +23,11 @@ process METABAT2 {
         def software = getSoftwareName(task.process)
         def prefix   = options.suffix ? "${meta.id}${options.suffix}" : "${meta.id}"
         """
+        jgi_summarize_bam_contig_depths \\
+            --outputDepth depth.txt \\
+            $bam \\
+            $args
 
-        metabat2 \\
-            --numThreads ${task.cpus} \\
-            --inFile ${assembly} \\
-            --abdFile depth.txt  \\
-            --outFile metabat2/${prefix} \\
-            --unbinned \\
-            ${args}
-        
-        format_metabat2_output.sh metabat2/${prefix} ${prefix}.metabat2.binning.tsv
         echo "2.15" > ${software}.version.txt
         """
 }

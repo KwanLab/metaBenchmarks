@@ -1,4 +1,4 @@
-process MINIMAP2_VAMB {
+process MINIMAP2 {
     tag "$meta.id"
     label 'process_low'
 
@@ -10,7 +10,7 @@ process MINIMAP2_VAMB {
     }
 
     input:
-        tuple val(meta), path(reads), path(catalogue)
+        tuple val(meta), path(reads), path(assembly)
 
     output:
         tuple val(meta), path("*.bam"), emit: bam
@@ -18,15 +18,16 @@ process MINIMAP2_VAMB {
 
     script:
         def args = task.ext.args ?: ''
+        def args2 = task.ext.args2 ?: ''
         def software = getSoftwareName(task.process)
         def prefix   = options.suffix ? "${meta.id}${options.suffix}" : "${meta.id}"
         def input_reads = meta.single_end ? "$reads" : "${reads[0]} ${reads[1]}"
     """
     minimap2 \\
         -t $task.cpus \\
-        -N 50 \\
-        -ax sr \\
-        ${catalogue} \\
+        ${args} \\
+        ${args2} \\
+        ${assembly} \\
         ${input_reads} | samtools view -F 3584 -b --threads $task.cpus > sample.bam
 
     echo \$(minimap2 --version 2>&1) > ${software}.version.txt
