@@ -5,7 +5,7 @@ process MMSEQS2 {
     conda (params.enable_conda ? "bioconda::mmseqs2=13.45111" : null)
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/YOUR-TOOL-HERE':
-        'quay.io/biocontainers/YOUR-TOOL-HERE' }"
+        'quay.io/biocontainers/soedinglab/mmseqs2' }"
 
     input:
         tuple val(meta), path(bam)
@@ -19,7 +19,7 @@ process MMSEQS2 {
         def prefix = task.ext.prefix ?: "${meta.id}"
         """
         TODO: Add mmseqs2 params...
-        mmseqs2
+        mmseqs easy-taxonomy
 
         cat <<-END_VERSIONS > versions.yml
         "${task.process}":
