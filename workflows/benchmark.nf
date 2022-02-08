@@ -33,7 +33,7 @@ ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multi
 //
 include { INPUT_CHECK } from '../subworkflows/local/input_check'
 include { PREPARE_COVERAGE_INPUT_FORMATS as PREP_COV_INPUTS } from '../subworkflows/local/prepare_coverage_input_formats'
-
+// TODO: Fix/rename imports for local modules
 // Taxon-profilers
 include { CHECK_KRAKEN_DB; DOWNLOAD_KRAKEN } from '../modules/local/download_kraken2'
 include { KRAKEN2 } from '../modules/local/kraken2'
@@ -96,13 +96,15 @@ workflow BENCHMARK {
     
     CHECK_KRAKEN_DB(params.kraken2_db)
 
-
+    // TODO: Fix/create database input channels
     
     KRAKEN2(taxon_profiling_ch, params.kraken2_db)
     MMSEQS2(taxon_profiling_ch, mmseqs2_db)
     AUTOMETA_TAXON_PROFILING_V1(taxon_profiling_ch, ncbi_db)
     AUTOMETA_TAXON_PROFILING_V2(taxon_profiling_ch, ncbi_db)
     //DIAMOND(taxon_profiling_ch, ncbi_db)
+
+    // TODO: Add benchmarking for taxon-profilers
 
     //
     // Run binning
@@ -127,7 +129,7 @@ workflow BENCHMARK {
     METABAT2(metabat2_ch)
     VAMB(binning_bam_ch)
 
-
+    // TODO: Add benchmarking for binners
 
     // FASTQC (
     //     INPUT_CHECK.out.reads

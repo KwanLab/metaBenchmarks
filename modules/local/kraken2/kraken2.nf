@@ -1,4 +1,4 @@
-process KRAKEN2 {
+process KRAKEN2_KRAKEN2 {
     tag "$meta.id"
     label 'process_high'
 
@@ -14,6 +14,7 @@ process KRAKEN2 {
 
     input:
         tuple val(meta), path(assembly)
+        path(db)
 
     output:
         tuple val(meta), path('*report.txt')              , emit: report
@@ -27,7 +28,7 @@ process KRAKEN2 {
         def prefix   = options.suffix ? "${meta.id}${options.suffix}" : "${meta.id}"
         """
         kraken2 \\
-            --db ${params.kraken2_db} \\
+            --db $db \\
             ${args} \\
             --threads $task.cpus \\
             --output ${prefix}.kraken2.output.txt \\
