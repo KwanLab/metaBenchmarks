@@ -1,6 +1,6 @@
 
-include { JGI_SUMMARIZE_BAM_CONTIG_DEPTHS } from '../modules/local/jgi_summarize_bam_contig_depths' addParams( options: [:] )
-include { MINIMAP2 } from '../modules/local/minimap2' addParams( options: [:] )
+include { JGI_SUMMARIZE_BAM_CONTIG_DEPTHS } from '../../modules/local/jgi_summarize_bam_contig_depths' addParams( options: [:] )
+include { MINIMAP2 } from '../../modules/local/minimap2' addParams( options: [:] )
 
 workflow PREPARE_COVERAGE_INPUT_FORMATS {
     take:
