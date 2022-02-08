@@ -13,9 +13,12 @@ process CHECK_KRAKEN_DB {
         container "quay.io/biocontainers/mulled-v2-5799ab18b5fc681e75923b2450abaa969907ec98:941789bd7fe00db16531c26de8bf3c5c985242a5-0"
     }
 
+    input:
+        path(kraken2_db_dir)
+
     script:
         """
-        kraken2-inspect -db ${params.kraken2_db}
+        kraken2-inspect -db ${kraken2_db_dir}
         echo \$(kraken2 --version 2>&1) | sed 's/^.*Kraken version //; s/ .*\$//' > kraken2.version.txt
         """
 }
@@ -26,7 +29,7 @@ process DOWNLOAD_KRAKEN {
 
     conda (params.enable_conda ? "conda-forge::curl=7.81.0" : null)
     container "curlimages/curl:7.81.0"
-
+    
     output:
         path("**/*")
 

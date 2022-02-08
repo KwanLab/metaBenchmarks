@@ -91,13 +91,14 @@ workflow BENCHMARK {
     
 
     if (params.kraken2_download_permission) {
-        DOWNLOAD_KRAKEN()
+        DOWNLOAD_KRAKEN(params.kraken2_db)
     }
-    CHECK_KRAKEN_DB()
+    
+    CHECK_KRAKEN_DB(params.kraken2_db)
 
 
     
-    KRAKEN2(taxon_profiling_ch)
+    KRAKEN2(taxon_profiling_ch, params.kraken2_db)
     MMSEQS2(taxon_profiling_ch, mmseqs2_db)
     AUTOMETA_TAXON_PROFILING_V1(taxon_profiling_ch, ncbi_db)
     AUTOMETA_TAXON_PROFILING_V2(taxon_profiling_ch, ncbi_db)

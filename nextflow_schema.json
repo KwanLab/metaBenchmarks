@@ -45,7 +45,7 @@
             }
         },
         "taxon_profiling_databases": {
-            "title": "taxon_profiling_databases",
+            "title": "Taxon-profiling Databases",
             "type": "object",
             "description": "Define where the pipeline should find taxon-profiling databases.",
             "default": "",
@@ -71,8 +71,8 @@
                 "ncbi_db"
             ]
         },
-        "autometa_va_params": {
-            "title": "autometa_va_params",
+        "autometa_v1_params": {
+            "title": "autometa_v1_params",
             "type": "object",
             "description": "",
             "default": "",
