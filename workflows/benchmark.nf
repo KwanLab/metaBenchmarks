@@ -31,21 +31,22 @@ ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multi
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
-include { GET_SOFTWARE_VERSIONS } from '../modules/local/get_software_versions'
-include { INPUT_CHECK } from '../subworkflows/local/input_check' addParams( options: [:] )
+include { INPUT_CHECK } from '../subworkflows/local/input_check'
+include { PREPARE_COVERAGE_INPUT_FORMATS as PREP_COV_INPUTS } from '../subworkflows/local/prepare_coverage_input_formats'
 include { PREPARE_COVERAGE_INPUT_FORMATS as PREP_COV_INPUTS } from '../subworkflows/local/input_check' addParams( options: [:] )
 
 // Taxon-profilers
-include { KRAKEN2 } from '../modules/local/kraken2' addParams( options: [:] )
-include { MMSEQS2 } from '../modules/local/mmseqs2' addParams( options: [:] )
-include { DIAMOND } from '../modules/local/diamond' addParams( options: [:] )
-include { AUTOMETA_V1_MAKE_TAXONOMY_TABLE as AUTOMETA_TAXON_PROFILING_V1 } from '../modules/local/autometa_v1_make_taxonomy_table.nf' addParams( options: [:] )
+include { CHECK_KRAKEN_DB; DOWNLOAD_KRAKEN } from '../modules/local/download_kraken2'
+include { KRAKEN2 } from '../modules/local/kraken2'
+include { MMSEQS2 } from '../subworkflows/local/mmseqs2'
+//include { DIAMOND } from '../subworkflows/local/diamond'
+include { AUTOMETA_V1_MAKE_TAXONOMY_TABLE as AUTOMETA_TAXON_PROFILING_V1 } from '../modules/local/autometa_v1_make_taxonomy_table.nf'
 
 // Binners
-include { AUTOMETA_V1_BINNING } from '../modules/local/autometa_v1_binning.nf' addParams( options: [:] )
-include { MAXBIN2 } from '../modules/local/maxbin2.nf' addParams( options: [:] )
-include { METABAT2 } from '../modules/local/metabat2.nf' addParams( options: [:] )
-include { MYCC } from '../modules/local/mycc.nf' addParams( options: [:] )
+include { AUTOMETA_V1_BINNING } from '../modules/local/autometa_v1_binning.nf'
+include { MAXBIN2 } from '../modules/local/maxbin2.nf' 
+include { METABAT2 } from '../modules/local/metabat2.nf'
+include { MYCC } from '../modules/local/mycc.nf' 
 
 /*
 ========================================================================================
