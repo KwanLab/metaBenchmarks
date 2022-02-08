@@ -78,7 +78,7 @@ workflow BENCHMARK {
     INPUT_CHECK (
         ch_input
     )
-    ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
+    //ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
 
     // Get paths to taxon-profiling databases
     ncbi_db = file(params.ncbi_db)
@@ -101,7 +101,7 @@ workflow BENCHMARK {
     MMSEQS2(taxon_profiling_ch, mmseqs2_db)
     AUTOMETA_TAXON_PROFILING_V1(taxon_profiling_ch, ncbi_db)
     AUTOMETA_TAXON_PROFILING_V2(taxon_profiling_ch, ncbi_db)
-    DIAMOND(taxon_profiling_ch, ncbi_db)
+    //DIAMOND(taxon_profiling_ch, ncbi_db)
 
     //
     // Run binning
@@ -128,36 +128,38 @@ workflow BENCHMARK {
 
 
 
-    FASTQC (
-        INPUT_CHECK.out.reads
-    )
-    ch_versions = ch_versions.mix(FASTQC.out.versions.first())
+    // FASTQC (
+    //     INPUT_CHECK.out.reads
+    // )
+    // ch_versions = ch_versions.mix(FASTQC.out.versions.first())
 
-    //
-    // MODULE: Pipeline reporting
-    //
-    CUSTOM_DUMPSOFTWAREVERSIONS (
-        ch_versions.unique().collectFile(name: 'collated_versions.yml')
-    )
+    // //
+    // // MODULE: Pipeline reporting
+    // //
+    // CUSTOM_DUMPSOFTWAREVERSIONS (
+    //     ch_versions.unique().collectFile(name: 'collated_versions.yml')
+    // )
 
-    //
-    // MODULE: MultiQC
-    //
-    workflow_summary    = Workflow{{ short_name[0]|upper }}{{ short_name[1:] }}.paramsSummaryMultiqc(workflow, summary_params)
-    ch_workflow_summary = Channel.value(workflow_summary)
+    // //
+    // // MODULE: MultiQC
+    // //
+    // workflow_summary    = Workflow{{ short_name[0]|upper }}{{ short_name[1:] }}.paramsSummaryMultiqc(workflow, summary_params)
+    // ch_workflow_summary = Channel.value(workflow_summary)
 
-    ch_multiqc_files = Channel.empty()
-    ch_multiqc_files = ch_multiqc_files.mix(Channel.from(ch_multiqc_config))
-    ch_multiqc_files = ch_multiqc_files.mix(ch_multiqc_custom_config.collect().ifEmpty([]))
-    ch_multiqc_files = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
-    ch_multiqc_files = ch_multiqc_files.mix(CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect())
-    ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]}.ifEmpty([]))
+    // ch_multiqc_files = Channel.empty()
+    // ch_multiqc_files = ch_multiqc_files.mix(Channel.from(ch_multiqc_config))
+    // ch_multiqc_files = ch_multiqc_files.mix(ch_multiqc_custom_config.collect().ifEmpty([]))
+    // ch_multiqc_files = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
+    // ch_multiqc_files = ch_multiqc_files.mix(CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect())
+    // ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]}.ifEmpty([]))
 
-    MULTIQC (
-        ch_multiqc_files.collect()
-    )
-    multiqc_report = MULTIQC.out.report.toList()
-    ch_versions    = ch_versions.mix(MULTIQC.out.versions)
+    // MULTIQC (
+    //     ch_multiqc_files.collect()
+    // )
+    // multiqc_report = MULTIQC.out.report.toList()
+    // ch_versions    = ch_versions.mix(MULTIQC.out.versions)
+
+   
 }
 
 /*
