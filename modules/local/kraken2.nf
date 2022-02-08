@@ -14,7 +14,6 @@ process KRAKEN2 {
 
     input:
         tuple val(meta), path(assembly)
-        path(db)
 
     output:
         tuple val(meta), path('*report.txt')              , emit: report
@@ -28,7 +27,7 @@ process KRAKEN2 {
         def prefix   = options.suffix ? "${meta.id}${options.suffix}" : "${meta.id}"
         """
         kraken2 \\
-            --db $db \\
+            --db ${params.kraken2_db} \\
             ${args} \\
             --threads $task.cpus \\
             --output ${prefix}.kraken2.output.txt \\
