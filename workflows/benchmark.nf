@@ -81,15 +81,23 @@ workflow BENCHMARK {
     ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
 
     // Get paths to taxon-profiling databases
-    // file("/media/bigdrive1/Databases/kraken2/kraken2_db")
-    kraken2_db = file(params.kraken2_db)
     ncbi_db = file(params.ncbi_db)
     
     //
     // Run taxon profiling
     //
     taxon_profiling_ch = INPUT_CHECK.out.taxon_profiling
-    KRAKEN2(taxon_profiling_ch, kraken2_db)
+    // file("/media/bigdrive1/Databases/kraken2/kraken2_db")
+    
+
+    if (params.kraken2_download_permission) {
+        DOWNLOAD_KRAKEN()
+    }
+    CHECK_KRAKEN_DB()
+
+
+    
+    KRAKEN2(taxon_profiling_ch)
     MMSEQS2(taxon_profiling_ch, mmseqs2_db)
     AUTOMETA_TAXON_PROFILING_V1(taxon_profiling_ch, ncbi_db)
     AUTOMETA_TAXON_PROFILING_V2(taxon_profiling_ch, ncbi_db)
