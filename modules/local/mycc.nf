@@ -23,7 +23,7 @@ process MYCC {
         def prefix   = options.suffix ? "${meta.id}${options.suffix}" : "${meta.id}"
         """
         # Check coverages table for header and reformat if necessary
-        if grep -q 'contig'$'\t''coverage' $coverage
+        if grep -q 'contig'\$'\t''coverage' $coverage
         then 
             echo "Found header, removing...";
             sed -i 1d $coverage
