@@ -33,7 +33,6 @@ ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multi
 //
 include { INPUT_CHECK } from '../subworkflows/local/input_check'
 include { PREPARE_COVERAGE_INPUT_FORMATS as PREP_COV_INPUTS } from '../subworkflows/local/prepare_coverage_input_formats'
-include { PREPARE_COVERAGE_INPUT_FORMATS as PREP_COV_INPUTS } from '../subworkflows/local/input_check' addParams( options: [:] )
 
 // Taxon-profilers
 include { CHECK_KRAKEN_DB; DOWNLOAD_KRAKEN } from '../modules/local/download_kraken2'
