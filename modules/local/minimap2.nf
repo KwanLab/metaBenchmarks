@@ -22,15 +22,15 @@ process MINIMAP2 {
         def software = getSoftwareName(task.process)
         def prefix   = options.suffix ? "${meta.id}${options.suffix}" : "${meta.id}"
         def input_reads = meta.single_end ? "$reads" : "${reads[0]} ${reads[1]}"
-    """
-    minimap2 \\
-        -t $task.cpus \\
-        ${args} \\
-        ${args2} \\
-        ${assembly} \\
-        ${input_reads} | samtools view -F 3584 -b --threads $task.cpus > sample.bam
+        """
+        minimap2 \\
+            -t $task.cpus \\
+            ${args} \\
+            ${args2} \\
+            ${assembly} \\
+            ${input_reads} | samtools view -F 3584 -b --threads $task.cpus > sample.bam
 
-    echo \$(minimap2 --version 2>&1) > ${software}.version.txt
-    samtools --version | head -n1 |  sed -e "s/samtools //g" >> ${software}.version.txt
-    """
+        echo \$(minimap2 --version 2>&1) > ${software}.version.txt
+        samtools --version | head -n1 |  sed -e "s/samtools //g" >> ${software}.version.txt
+        """
 }

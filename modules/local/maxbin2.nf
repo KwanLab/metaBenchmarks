@@ -12,17 +12,17 @@ process MAXBIN2 {
     path "*.version.txt"                    , emit: version
 
     script:
-    def args = task.ext.args ?: ''
-    """
-    run_MaxBin.pl \\
-        -contig ${contig} \\
-        -abund ${coverage} \\
-        -out maxbin2_output \\
-        -thread ${task.cpus} \\
-        ${options.args}
+        def args = task.ext.args ?: ''
+        """
+        run_MaxBin.pl \\
+            -contig ${contig} \\
+            -abund ${coverage} \\
+            -out maxbin2_output \\
+            -thread ${task.cpus} \\
+            ${options.args}
 
-    
-    run_MaxBin.pl -v | head -n 1 | sed 's/^MaxBin //' > MAXBIN2.version.txt
-    """
+        
+        run_MaxBin.pl -v | head -n 1 | sed 's/^MaxBin //' > MAXBIN2.version.txt
+        """
 }
 

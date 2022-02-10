@@ -8,15 +8,15 @@ process SAMPLESHEET_CHECK {
     }
 
     input:
-    path samplesheet
+        path samplesheet
 
     output:
-    path '*.csv'
+        path '*.csv'
 
     script: // This script is bundled with the pipeline, in nf-core/benchmark/bin/
-    """
-    check_samplesheet.py \\
-        $samplesheet \\
-        samplesheet.valid.csv
-    """
+        """
+        check_samplesheet.py \\
+            $samplesheet \\
+            samplesheet.valid.csv
+        """
 }

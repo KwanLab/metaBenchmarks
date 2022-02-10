@@ -9,16 +9,18 @@ process AUTOMETA_V1_UNCLUSTERED_RECRUITMENT {
     container "jasonkwan/autometa:1.0.3"
 
     input:
-    tuple val(meta), path(recursive_dbscan_output), path(kmer_marix)
+        tuple val(meta), path(recursive_dbscan_output), path(kmer_marix)
 
     output:
-    tuple val(meta), path("ml_recruitment_output.tab"), emit: ml_recruitment_output
+        tuple val(meta), path("ml_recruitment_output.tab"), emit: ml_recruitment_output
 
-    """
-    ML_recruitment.py \
-        --contig_tab ${recursive_dbscan_output} \
-        --k_mer_matrix ${k-mer_marix} \
-        --out_table ml_recruitmtent_output.tab
-
-    """
+    script:
+        def args = task.ext.args ?: ''
+        """
+        ML_recruitment.py \\
+            --contig_tab ${recursive_dbscan_output} \\
+            --k_mer_matrix ${kmer_marix} \\
+            --out_table ml_recruitmtent_output.tab \\
+            ${args}
+        """
 }

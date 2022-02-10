@@ -33,16 +33,19 @@ ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multi
 //
 include { INPUT_CHECK } from '../subworkflows/local/input_check'
 include { PREPARE_COVERAGE_INPUT_FORMATS as PREP_COV_INPUTS } from '../subworkflows/local/prepare_coverage_input_formats'
-// TODO: Fix/rename imports for local modules
+
 // Taxon-profilers
-include { CHECK_KRAKEN_DB; DOWNLOAD_KRAKEN } from '../modules/local/download_kraken2'
-include { KRAKEN2 } from '../modules/local/kraken2'
+include { CHECK_KRAKEN_DB; DOWNLOAD_KRAKEN } from '../modules/local/kraken2/download_kraken2'
+include { KRAKEN2 } from '../modules/local/kraken2/kraken2'
 include { MMSEQS2 } from '../subworkflows/local/mmseqs2'
 //include { DIAMOND } from '../subworkflows/local/diamond'
-include { AUTOMETA_V1_MAKE_TAXONOMY_TABLE as AUTOMETA_TAXON_PROFILING_V1 } from '../modules/local/autometa_v1_make_taxonomy_table.nf'
+include { AUTOMETA_V1_MAKE_TAXONOMY_TABLE as AUTOMETA_V1_TAXON_PROFILING } from '../modules/local/autometa_v1/make_taxonomy_table.nf'
 
 // Binners
-include { AUTOMETA_V1_BINNING } from '../modules/local/autometa_v1_binning.nf'
+include { AUTOMETA_V1_BINNING } from '../modules/local/autometa_v1/binning.nf'
+include { AUTOMETA_V2_BINNING } from '../modules/local/autometa_v2/binning.nf'
+include { AUTOMETA_BENCHMARK_BINNING as BENCHMARK_BINNING} from '../modules/local/autometa_v2/benchmark_binning.nf'
+include { AUTOMETA_BENCHMARK_TAXON_PROFILING as BENCHMARK_TAXON_PROFILING } from '../modules/local/autometa_v2/benchmark_taxon_profiling.nf'
 include { MAXBIN2 } from '../modules/local/maxbin2.nf' 
 include { METABAT2 } from '../modules/local/metabat2.nf'
 include { MYCC } from '../modules/local/mycc.nf' 
@@ -78,7 +81,6 @@ workflow BENCHMARK {
     INPUT_CHECK (
         ch_input
     )
-    //ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
 
     // Get paths to taxon-profiling databases
     ncbi_db = file(params.ncbi_db)
@@ -100,11 +102,23 @@ workflow BENCHMARK {
     
     KRAKEN2(taxon_profiling_ch, params.kraken2_db)
     MMSEQS2(taxon_profiling_ch, mmseqs2_db)
-    AUTOMETA_TAXON_PROFILING_V1(taxon_profiling_ch, ncbi_db)
-    AUTOMETA_TAXON_PROFILING_V2(taxon_profiling_ch, ncbi_db)
+    AUTOMETA_V1_TAXON_PROFILING(taxon_profiling_ch, ncbi_db)
+    AUTOMETA_V2_TAXON_PROFILING(taxon_profiling_ch, ncbi_db)
     //DIAMOND(taxon_profiling_ch, ncbi_db)
 
-    // TODO: Add benchmarking for taxon-profilers
+    // TODO: Create channel corresponding to taxon-profiling results and appropriate
+    // reference ground-truths file
+    KRAKEN2.out.taxon_profiling
+        .combine(MMSEQS2.out.taxon_profiling)
+        .combine(AUTOMETA_V1_TAXON_PROFILING.out.taxon_profiling)
+        .combine(AUTOMETA_V2_TAXON_PROFILING.out.taxon_profiling)
+        .set{taxon_profiling_results_ch}
+    
+    // Benchmark taxon-profiling results
+    BENCHMARK_TAXON_PROFILING(
+        taxon_profiling_results_ch,
+        ncbi_db
+    )
 
     //
     // Run binning
@@ -113,56 +127,39 @@ workflow BENCHMARK {
         INPUT_CHECK.out.binning
     )
     
-    binning_tab_ch = PREP_COV_INPUTS.out.table
-    binning_bam_ch = PREP_COV_INPUTS.out.bam
-
     // Binners using cov table
+    PREP_COV_INPUTS.out.table
+        .set{binning_tab_ch}
+
     MYCC(binning_tab_ch)
     MAXBIN2(binning_tab_ch)
     AUTOMETA_V1_BINNING(binning_tab_ch)
     AUTOMETA_V2_BINNING(binning_tab_ch)
     
     // Binners using alignments.bam
+    PREP_COV_INPUTS.out.bam
+        .set{binning_bam_ch}
+
+    VAMB(binning_bam_ch)
+
+    // Binners using coverage depth table
     binning_ch
         .join(PREP_COV_INPUTS.out.depth)
         .set{metabat2_ch}
+    
     METABAT2(metabat2_ch)
-    VAMB(binning_bam_ch)
 
-    // TODO: Add benchmarking for binners
+    // TODO: Create channel corresponding to binning results and appropriate
+    // reference ground-truths file
+    MYCC.out.binning
+        .combine(VAMB.out.binning)
+        .combine(MAXBIN2.out.binning)
+        .combine(AUTOMETA_V1_BINNING.out.binning)
+        .combine(AUTOMETA_V2_BINNING.out.binning)
+        .set{binning_classification_results_ch}
 
-    // FASTQC (
-    //     INPUT_CHECK.out.reads
-    // )
-    // ch_versions = ch_versions.mix(FASTQC.out.versions.first())
+    BENCHMARK_BINNING(binning_classification_results_ch)
 
-    // //
-    // // MODULE: Pipeline reporting
-    // //
-    // CUSTOM_DUMPSOFTWAREVERSIONS (
-    //     ch_versions.unique().collectFile(name: 'collated_versions.yml')
-    // )
-
-    // //
-    // // MODULE: MultiQC
-    // //
-    // workflow_summary    = Workflow{{ short_name[0]|upper }}{{ short_name[1:] }}.paramsSummaryMultiqc(workflow, summary_params)
-    // ch_workflow_summary = Channel.value(workflow_summary)
-
-    // ch_multiqc_files = Channel.empty()
-    // ch_multiqc_files = ch_multiqc_files.mix(Channel.from(ch_multiqc_config))
-    // ch_multiqc_files = ch_multiqc_files.mix(ch_multiqc_custom_config.collect().ifEmpty([]))
-    // ch_multiqc_files = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
-    // ch_multiqc_files = ch_multiqc_files.mix(CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect())
-    // ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]}.ifEmpty([]))
-
-    // MULTIQC (
-    //     ch_multiqc_files.collect()
-    // )
-    // multiqc_report = MULTIQC.out.report.toList()
-    // ch_versions    = ch_versions.mix(MULTIQC.out.versions)
-
-   
 }
 
 /*

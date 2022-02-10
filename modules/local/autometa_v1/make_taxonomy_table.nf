@@ -25,6 +25,7 @@ process AUTOMETA_V1_MAKE_TAXONOMY_TABLE {
         tuple val(meta), path('unclassified.fasta')           , emit: unclassified_fasta
 
     script:
+        def args = task.ext.args ?: ''
         """
         make_taxonomy_table.py \\
             --assembly ${assembly} \\
