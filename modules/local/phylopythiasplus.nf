@@ -5,7 +5,7 @@ process PHYLOPYTHIASPLUS {
     container "cami/ppsp:1.4"
 
     input:
-    tuple val(meta), path(results), path(contigs), path(dbfile), path(refseq), path(s16db), path(mgdb)
+    tuple val(meta), path(results), path(assembly), path(dbfile), path(refseq), path(s16db), path(mgdb)
 
     output:
     tuple val(meta), path("*.bam"), emit: bam

@@ -1,29 +1,11 @@
 #!/usr/bin/env nextflow
 /*
 ========================================================================================
-    metabenchmark
+    metaBenchmarks
 ========================================================================================
-
-----------------------------------------------------------------------------------------
 */
 
 nextflow.enable.dsl = 2
-
-/*
-========================================================================================
-    GENOME PARAMETER VALUES
-========================================================================================
-*/
-
-params.fasta = WorkflowMain.getGenomeAttribute(params, 'fasta')
-
-/*
-========================================================================================
-    VALIDATE & PRINT PARAMETER SUMMARY
-========================================================================================
-*/
-
-WorkflowMain.initialise(workflow, params, log)
 
 /*
 ========================================================================================
@@ -33,12 +15,6 @@ WorkflowMain.initialise(workflow, params, log)
 
 include { BENCHMARK } from './workflows/benchmark'
 
-//
-// WORKFLOW: Run main nf-core/benchmark analysis pipeline
-//
-workflow NFCORE_BENCHMARK {
-    BENCHMARK ()
-}
 
 /*
 ========================================================================================
@@ -50,8 +26,11 @@ workflow NFCORE_BENCHMARK {
 // WORKFLOW: Execute a single named workflow for the pipeline
 // See: https://github.com/nf-core/rnaseq/issues/619
 //
+//
+// WORKFLOW: Run main benchmark analysis pipeline
+//
 workflow {
-    NFCORE_BENCHMARK ()
+    BENCHMARK()
 }
 
 /*

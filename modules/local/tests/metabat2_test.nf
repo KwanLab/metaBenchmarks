@@ -20,7 +20,8 @@ workflow  {
                     meta.id = name.simpleName
                     return [meta, name, bam]
             }
-        .set {ch_assembly}
-    METABAT2(ch_assembly)
+        .set {metabat_inputs_ch}
+    // NOTE: meta id, assembly and bam in channel
+    METABAT2(metabat_inputs_ch)
 }
 

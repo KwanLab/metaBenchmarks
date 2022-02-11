@@ -1,0 +1,23 @@
+process KRAKEN2_CHECK_DB {
+
+    label 'process_low'
+    
+    conda (params.enable_conda ? "bioconda::kraken2=2.1.2" : null)
+    if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
+        // This container was taken from official nf-core module for kraken2
+        container "https://depot.galaxyproject.org/singularity/mulled-v2-5799ab18b5fc681e75923b2450abaa969907ec98:941789bd7fe00db16531c26de8bf3c5c985242a5-0"
+    } else {
+        // This container was taken from official nf-core module for kraken2
+        // For information on mulled-v2 see https://github.com/BioContainers/mulled
+        container "quay.io/biocontainers/mulled-v2-5799ab18b5fc681e75923b2450abaa969907ec98:941789bd7fe00db16531c26de8bf3c5c985242a5-0"
+    }
+
+    input:
+        path(kraken2_db_dir)
+
+    script:
+        """
+        kraken2-inspect -db ${kraken2_db_dir}
+        echo \$(kraken2 --version 2>&1) | sed 's/^.*Kraken version //; s/ .*\$//' > kraken2.version.txt
+        """
+}

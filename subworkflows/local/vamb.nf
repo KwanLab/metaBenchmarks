@@ -1,6 +1,6 @@
 
 include { VAMB } from '../../modules/local/vamb'
-include { MINIMAP2_VAMB } from '../../modules/local/minimap2_vamb'
+include { MINIMAP2 } from '../../modules/local/minimap2'
 
 workflow VAMB_BENCH {
     take:
@@ -14,12 +14,12 @@ workflow VAMB_BENCH {
             )
             .set{reads_contigs_ch}
 
-        MINIMAP2_VAMB(reads_contigs_ch)
+        MINIMAP2(reads_contigs_ch)
 
         // Join the contig and bam files by meta id
         contigs
             .join(
-                MINIMAP2_VAMB.out.bam
+                MINIMAP2.out.bam
             )
             .set{contigs_bam_ch}
         

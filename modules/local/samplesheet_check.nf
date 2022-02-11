@@ -1,6 +1,4 @@
 process SAMPLESHEET_CHECK {
-    tag "$samplesheet"
-        saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:'pipeline_info', meta:[:], publish_by_meta:[]) }
 
     conda (params.enable_conda ? "conda-forge::python=3.8.3" : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
@@ -10,15 +8,15 @@ process SAMPLESHEET_CHECK {
     }
 
     input:
-    path samplesheet
+        path samplesheet
 
     output:
-    path '*.csv'
+        path '*.csv'
 
     script: // This script is bundled with the pipeline, in nf-core/benchmark/bin/
-    """
-    check_samplesheet.py \\
-        $samplesheet \\
-        samplesheet.valid.csv
-    """
+        """
+        check_samplesheet.py \\
+            $samplesheet \\
+            samplesheet.valid.csv
+        """
 }
