@@ -1,0 +1,1 @@
+nextflow run simulated_main.nf -profile slurm -c simulated.config -resume

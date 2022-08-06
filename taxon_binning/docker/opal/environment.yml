@@ -1,0 +1,10 @@
+name: amber
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - seaborn
+  - matplotlib
+  - jinja2
+  - bokeh

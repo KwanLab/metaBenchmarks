@@ -1,0 +1,8 @@
+97c78f1d9e4ce0d1744685066045478b  work/6c/18ad856f8941fd2ab3bdbb2ec0ba0e/312Mbp.bacteria.markers.tsv
+25d7af38bd1c0bf76227245ee54637b8  work/4c/a59b2d2b506904da1714dcdb1b510a/2500Mbp.bacteria.markers.tsv
+e39310e7aca65d5d9e950e6975b57dd5  work/c2/e360e960d789706c5cfa7ea69135a6/5000Mbp.bacteria.markers.tsv
+54429fc99cd691f2e55572d984b88e39  work/af/085ffedecf8381f5e1f592a194c8bb/10000Mbp.bacteria.markers.tsv
+d05ff20904a8d4e41e098d36f539971d  work/c8/3c60aa7786516df8b04d54a570542a/625Mbp.bacteria.markers.tsv
+17e9dbd7c31bfd43f1af43300e8e8d84  work/be/66e7fe164cb3607f82283fc26c8b57/78Mbp.bacteria.markers.tsv
+bc344e1ce1939e0a6600dbef8d657fef  work/75/67f5936d020ee831d1c511bc6d756d/1250Mbp.bacteria.markers.tsv
+d7b1ce4390368c4d015bd2d715feb2a7  work/c4/34ff4d68bb5e1866ae5bce088f8529/156Mbp.bacteria.markers.tsv

@@ -1,0 +1,8 @@
+data/78Mbp, 78Mbp
+data/156Mbp, 156Mbp
+data/312Mbp, 312Mbp
+data/625Mbp, 625Mbp
+data/1250Mbp, 1250Mbp
+data/2500Mbp, 2500Mbp
+data/5000Mbp, 5000Mbp
+data/10000Mbp, 10000Mbp

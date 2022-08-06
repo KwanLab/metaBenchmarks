@@ -1,0 +1,12 @@
+name: taxon-binning-benchmarks
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - nextflow
+  - mmseqs2
+  - kraken2
+  - autometa
+  - prodigal
+  - diamond

@@ -1,0 +1,11 @@
+name: genome-binning-benchmarks
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - nextflow
+  - autometa
+  - maxbin2
+  - metabat2
+  - vamb

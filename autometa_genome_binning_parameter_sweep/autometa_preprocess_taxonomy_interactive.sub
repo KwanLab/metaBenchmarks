@@ -1,0 +1,27 @@
+
+universe = docker
+docker_image = jasonkwan/autometa:latest
+# Change to universe = vanilla if wish to use opensciencegrid (singularity image)
+# +SingularityImage = "/cvmfs/singularity.opensciencegrid.org/jasonkwan/autometa:latest"
+log = 78Mbp_taxonomy_$(Cluster)_$(Process).log
+
+initial_dir = data/78Mbp
+# input files = env.tar.gz, assembly, ncbi_tarball
+# NOTE: metagenome.filtered.fna is in $(initial_dir)/metagenome.filtered.fna AKA 78Mbp/metagenome.filtered.fna
+transfer_input_files = /home/erees/autometa_runs/binning_param_sweep/data/databases/ncbi.tar.gz,metagenome.filtered.fna
+executable = /home/erees/autometa_runs/binning_param_sweep/templates/autometa_taxonomy.sh
+output = 78Mbp_taxonomy_$(Cluster)_$(Process).out
+error = 78Mbp_taxonomy_$(Cluster)_$(Process).err
+
+should_transfer_files = YES
+when_to_transfer_output = ON_EXIT
+
+request_cpus = 16
+request_memory = 128GB
+request_disk = 400GB
++WantGlideIn = true
++WantFlocking = true
+
+Requirements = (Target.HasCHTCStaging == true) && ( HAS_SINGULARITY || (HasSingularity && HAS_CVMFS_oasis_opensciencegrid_org))
+
+queue
