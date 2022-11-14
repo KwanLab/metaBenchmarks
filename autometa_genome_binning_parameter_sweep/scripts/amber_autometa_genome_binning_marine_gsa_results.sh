@@ -69,10 +69,10 @@ get_cami_classification_benchmarks () {
 sample="marmgCAMI2_short_read_pooled_gold_standard_assembly"
 dataset="marine"
 # assembly="gsa_pooled_mapping_short.binning"
-camiDir="/media/BRIANDATA4/second_challenge_evaluation/binning/genome_binning/${dataset}_dataset/"
+camiDir="/home/evan/second_challenge_evaluation/binning/genome_binning/${dataset}_dataset/"
 camiLabels="MetaBAT 2.13-33 (A1),MetaBAT 2.13-33 (A2),MetaBAT 0.25.4 (A3),MetaBinner 1.0 (B1),MetaBinner 1.0 (B2),MetaBinner 1.0 (B3),Autometa cami2-146383e (C1),Autometa cami2-146383e (C2),MetaWRAP 1.2.3 (D1),UltraBinner 1.0 (E1),MaxBin 2.2.7 (F1),MaxBin 2.0.2 (F2),CONCOCT 1.1.0 (G1),CONCOCT 0.4.1 (G2),Vamb fa045c0 (J1)"
 
-results="/media/BRIANDATA4/autometa2_benchmarks/autometa_genome_binning_parameter_sweep/nf-autometa-genome-binning-parameter-sweep-benchmarking-results/cami/${sample}/genome_binning"
+results="/home/evan/autometa2_benchmarks/autometa_genome_binning_parameter_sweep/nf-autometa-genome-binning-parameter-sweep-benchmarking-results/cami/${sample}/genome_binning"
 
 mkdir -p "${results}/amber-output"
 
@@ -81,11 +81,13 @@ MOUNTED_CAMI_DIR="/cami"
 
 if [ ! -d ${results}/amber_results_cami ];then
   echo "computing cami submission classification performance metrics"
-  get_cami_classification_benchmarks $camiDir $results amber_results_cami &> "${results}/amber-output/amber_results_cami.log" &
+  get_cami_classification_benchmarks $camiDir $results amber_results_cami
 else
   echo "Skipping cami submissions classification performance metrics computation (already done)"
 fi
+# get_cami_classification_benchmarks $camiDir $results amber_results_cami &> "${results}/amber-output/amber_results_cami.log"
 
+echo "Searching for .binning results"
 binnings=()
 binningLabels=()
 for binning in `find ${results} -name "*.binning"`;do
@@ -172,10 +174,8 @@ with open(os.path.join(amber_outdir, f'{outname}_parameters.tsv'), 'w') as outfh
         --labels "${joinedLabels}" \
         --remove_genomes ${MOUNTED_CAMI_DIR}/data/marine_genome_cat.tsv \
         --keyword "circular element" \
-        --output_dir "${MOUNTED_RESULTS_DIR}/amber-output/${outname}" &> "${results}/amber-output/${outname}.log" &
+        --output_dir "${MOUNTED_RESULTS_DIR}/amber-output/${outname}" &> "${results}/amber-output/${outname}.log"
 done
-
-wait
 
 export OUTDIR=${results}
 python -c """

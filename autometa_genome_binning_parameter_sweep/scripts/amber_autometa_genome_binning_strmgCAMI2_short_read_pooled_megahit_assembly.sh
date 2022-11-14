@@ -66,22 +66,23 @@ get_cami_classification_benchmarks () {
 
 sample="strmgCAMI2_short_read_pooled_megahit_assembly"
 dataset="strain_madness"
-camiDir="/media/BRIANDATA4/second_challenge_evaluation/binning/genome_binning/${dataset}_dataset/"
+camiDir="/home/evan/second_challenge_evaluation/binning/genome_binning/${dataset}_dataset/"
 camiLabels="MetaBAT 0.25.4 (A3),MetaBinner 1.0 (B2),MetaBinner 1.0 (B3),MetaBinner 1.0 (B4),MetaBinner 1.0 (B5),MetaBinner 1.0 (B6),MetaBinner 1.0 (B7),MetaBinner 1.0 (B8),Autometa cami2-146383e (C2),MetaWRAP 1.2.3 (D1),UltraBinner 1.0 (E1),UltraBinner 1.0 (E2),MaxBin 2.2.7 (F1),MaxBin 2.0.2 (F2),CONCOCT 1.1.0 (G1),CONCOCT 0.4.1 (G2),Vamb fa045c0 (J1)"
-results="/media/BRIANDATA4/autometa2_benchmarks/autometa_genome_binning_parameter_sweep/nf-autometa-genome-binning-parameter-sweep-benchmarking-results/cami/${sample}/genome_binning"
+results="/home/evan/autometa2_benchmarks/autometa_genome_binning_parameter_sweep/nf-autometa-genome-binning-parameter-sweep-benchmarking-results/cami/${sample}/genome_binning"
 
 mkdir -p "${results}/amber-output"
 
 MOUNTED_RESULTS_DIR="/results"
 MOUNTED_CAMI_DIR="/cami"
 
-if [ ! -d ${results}/amber_results_cami ];then
+if [ ! -d ${results}/amber-output/amber_results_cami ];then
   echo "computing cami submission classification performance metrics"
-  get_cami_classification_benchmarks $camiDir $results amber_results_cami &> "${results}/amber-output/amber_results_cami.log" &
+  get_cami_classification_benchmarks $camiDir $results amber_results_cami &> "${results}/amber-output/amber_results_cami.log"
 else
   echo "Skipping cami submissions classification performance metrics computation (already done)"
 fi
 
+echo "Finding binning results..."
 binnings=()
 binningLabels=()
 for binning in `find ${results} -name "*.binning"`;do
@@ -119,6 +120,12 @@ for startIndex in $(seq 0 $sliceLength ${#binningLabels[@]});do
     endIndex=${#binningLabels[@]}
   fi
   outname="amber_results_${startIndex}_to_${endIndex}"
+
+  if [ -f "${results}/amber-output/${outname}/results.tsv" ];then
+    echo "${outname} results already exists, continuing..."
+    continue
+  fi
+
   echo "computing AMBER classification metrics for ${#sliceBinnings[@]} binning results (${#sliceLabels[@]} labels) --> ${outname}"
   joinedLabels=$(join_by ',' "${sliceLabels[@]}")
   nl_binnings=$(join_by '\n' "${sliceBinnings[@]}")
@@ -155,18 +162,30 @@ with open(os.path.join(amber_outdir, f'{outname}_parameters.tsv'), 'w') as outfh
   rm ${results}/amber-output/${outname}_labels.txt ${results}/amber-output/${outname}_binnings.txt
 
   # RUN AMBER
-  docker run --rm \
-    -v $results:${MOUNTED_RESULTS_DIR}:rw \
-    -v $camiDir:${MOUNTED_CAMI_DIR}:ro \
-    --user=$(id -u):$(id -g) \
-    cami-challenge/amber \
-        -g ${MOUNTED_CAMI_DIR}/data/ground_truth/strain_madness_megahit.binning \
-        ${sliceBinnings[@]} \
-        --labels "${joinedLabels}" \
-        --output_dir "${MOUNTED_RESULTS_DIR}/amber-output/${outname}" &> "${results}/amber-output/${outname}.log" &
+  # Wrap this docker run command in srun...
+  MEMORY=68000
+  srun \
+    --ntasks=1 \
+    --job-name $outname \
+    --output "${outname}.out" \
+    --error "${outname}.err" \
+    --cpus-per-task 20 \
+    --mem=$MEMORY \
+    --mincpus=20 \
+    docker run --rm \
+      --memory=68GB \
+      -v $results:${MOUNTED_RESULTS_DIR}:rw \
+      -v $camiDir:${MOUNTED_CAMI_DIR}:ro \
+      --user=$(id -u):$(id -g) \
+      cami-challenge/amber \
+          -g ${MOUNTED_CAMI_DIR}/data/ground_truth/strain_madness_megahit.binning \
+          ${sliceBinnings[@]} \
+          --labels "${joinedLabels}" \
+          --output_dir "${MOUNTED_RESULTS_DIR}/amber-output/${outname}" &> "${results}/amber-output/${outname}.log" &
 done
 
 wait
+
 
 export OUTDIR=${results}
 python -c """
