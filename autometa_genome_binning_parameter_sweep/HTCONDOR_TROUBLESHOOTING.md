@@ -1,8 +1,25 @@
-# Miscellaneous Troubleshooting Notes
+# HTCondor Notes & Troubleshooting
 
-## Packaging environment for transfer to compute node
+- [HTCondor Resoures](#htcondor-resources)
+- [Creating a conda env for htcondor](#creating-a-conda-compute-environment-for-use-with-htcondor-chtc)
+- [Restarting held jobs with higher RAM](#restarting-jobs-that-have-been-put-on-hold-due-to-time-limits-or-memory-usage)
 
-**NOTE: This is not needed because the submit file uses the Autometa docker image instead**
+## HTCondor Resources
+
+- [Hello world example](https://chtc.cs.wisc.edu/uw-research-computing/helloworld.html#1-lets-first-do-and-then-ask-why)
+- [More information on special variables like "$1", "$2", and "$@"](https://swcarpentry.github.io/shell-novice/06-script/index.html)
+- [HTCondors DAGman](https://htcondor.readthedocs.io/en/latest/users-manual/dagman-workflows.html#dag-submission)
+- [multiple jobs with initialdir](https://chtc.cs.wisc.edu/uw-research-computing/multiple-jobs.html#initialdir)
+- [multiples jobs with queue <var> from <list>](https://chtc.cs.wisc.edu/uw-research-computing/multiple-jobs.html#foreach)
+- [CHTC Squid Proxy for file transfer](https://chtc.cs.wisc.edu/uw-research-computing/file-avail-squid.html)
+- [Create a portable python installation with miniconda](https://chtc.cs.wisc.edu/uw-research-computing/conda-installation.html#option-1-pre-install-miniconda-and-transfer-to-jobs)
+- [Open Science Grid](https://github.com/opensciencegrid/cvmfs-singularity-sync/pull/368#event-6628051950)
+- [OSG locations tutorial](https://github.com/OSGConnect/tutorial-osg-locations)
+- [Map Customizer](https://www.mapcustomizer.com/) (coordinates imported from OSG locations tutorial)
+- [Finding OSG Locations](https://support.opensciencegrid.org/support/solutions/articles/12000061978-finding-osg-locations)
+- [Scaling beyond local HTC capacity](https://chtc.cs.wisc.edu/uw-research-computing/scaling-htc.html#uw)
+
+## Creating a conda compute environment for use with HTCondor (CHTC)
 
 ```bash
 # Install mamba (faster and same commands available)
@@ -16,6 +33,16 @@ mamba activate conda-pack
 conda-pack -n autometa
 ```
 
+NOTE: This is _NOT_ needed if the submit file uses the `docker` universe with a specified docker image.
+
+i.e. in the submit file:
+
+```bash
+# universe = vanilla # vanilla universe should be used with conda env tarball
+universe = docker
+docker_image = jasonkwan/autometa:latest
+```
+
 ## Restarting jobs that have been put on hold due to time limits or memory usage
 
 [HTCondor User Tutorial - CERN Indico](https://indico.cern.ch/event/611296/contributions/2604376/attachments/1471164/2276521/TannenbaumT_UserTutorial.pdf)
@@ -25,7 +52,7 @@ conda-pack -n autometa
 condor_q -hold
 ```
 
-### Example Output of `condor_q -hold`
+### Example Output
 
 ```text
 (autometa) [erees@submit-1 binning_param_sweep]$ condor_q -hold | head
@@ -201,6 +228,13 @@ WantDocker = true
 WantFlocking = true
 WhenToTransferOutput = "ON_EXIT"
 ```
+
+### Runtime/Monitoring Notes
+
+- 108 jobs for 78Mbp did not produce an output binning file
+  - 105 of these were HDBSCAN jobs with a coverage std.dev. cutoff at 2%
+  - 3 of these were test runs where the output parameter was incorrectly specified in the template causing the run to fail. (These were test runs prior to running the full parameter sweep)
+- taxon-profiling (`autometa_preprocess_taxonomy.sub`) for 2500Mbp and 5000Mbp failed due to job time limit (re-submitted with `+LongJob = true`)
 
 #### Autometa v2 nextflow binning process
 

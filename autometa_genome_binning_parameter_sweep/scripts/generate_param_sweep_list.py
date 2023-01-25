@@ -1,10 +1,12 @@
 #!/usr/bin/env python
+# Generate parameter sweep genome binning parameters for CAMI2 and simulated community datasets
+
+
 
 import argparse
 import glob
 from itertools import product
 import os
-
 
 
 def main():
@@ -27,7 +29,6 @@ def main():
     gc_stddev_limit = [2, 5, 10, 15]
 
     communities = glob.glob(os.path.join(args.input, args.glob))
-    communities = sorted(communities, key=lambda x: int(x.split("/")[-1].replace("Mbp","")) if "Mbp" in x else x)
     print(f"Found {len(communities)} communities")
     
     n_jobs = 0

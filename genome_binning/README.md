@@ -2,7 +2,7 @@
 
 ## Modules
 
-1. Autometa v2 large-data-mode (Separate process, TODO: create process for large-data-mode...)
+1. Autometa v2 large-data-mode (Separate process, see `${HOME}/metaBenchmarks/autometa_binning_parameter_sweep`)
 2. Autometa v2 (Separate process, see `${HOME}/metaBenchmarks/autometa_binning_parameter_sweep`)
 3. Autometa v1 (Separate process, see `${HOME}/metaBenchmarks/autometa_binning_parameter_sweep`)
 4. MaxBin2

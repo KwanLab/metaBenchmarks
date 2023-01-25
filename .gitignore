@@ -7,3 +7,15 @@ testing/
 testing*
 *.pyc
 pipeline_info
+# Slurm
+*.out
+*.err
+*.log
+# When using Autometa processes within nf workflow
+Autometa
+# data file extensions
+*.tsv
+*.tsv.gz
+*_labels.txt
+*_binnings.txt
+*.binning
