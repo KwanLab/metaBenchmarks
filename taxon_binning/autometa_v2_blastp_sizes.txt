@@ -1,0 +1,16 @@
+78Mbp -rw-rw---- 1 evan storage 149M Apr 9 03:52 ./work/c3/0760240f2a4d9d73ad87df38daaed7/blastp.tsv
+78Mbp -rw-rw---- 1 evan storage 149M Mar 28 15:31 ./work/f6/f81907cef86422855d3e81e06f8d94/blastp.tsv
+156Mbp -rw-rw---- 1 evan storage 294M Apr 9 14:40 ./work/4a/83eabc77b71e35fc70f3cb4fc6b409/blastp.tsv
+156Mbp -rw-rw---- 1 evan storage 294M Mar 28 22:06 ./work/a9/da87ec4e0323bce468c279afe357f5/blastp.tsv
+312Mbp -rw-rw---- 1 evan storage 570M Apr 10 11:27 ./work/ba/68290ad155c80844f158f280573ae5/blastp.tsv
+312Mbp -rw-rw---- 1 evan storage 570M Mar 29 11:02 ./work/9f/ca6534e529ff3a685fcd2f7fba561b/blastp.tsv
+625Mbp -rw-rw---- 1 evan storage 1.1G Apr 9 11:28 ./work/60/a7fc9449f383ace2854aa3c5c7eba4/blastp.tsv
+625Mbp -rw-rw---- 1 evan storage 1.1G Mar 31 18:30 ./work/d6/07b7cb6a1345d404ed2f853e440596/blastp.tsv
+1250Mbp -rw-rw---- 1 evan storage 2.3G Apr 3 13:23 ./work/d4/219b46e59dc92c0d23cdfbe904b110/blastp.tsv
+1250Mbp -rw-rw---- 1 evan storage 2.3G Apr 9 00:49 ./work/b3/c32678f92b60798710245ee68a6769/blastp.tsv
+2500Mbp -rw-rw---- 1 evan storage 3.5G Apr 9 04:32 ./work/e3/f85c448a5a964506fedec7af07fdf4/blastp.tsv
+2500Mbp -rw-rw---- 1 evan storage 3.5G Mar 29 22:49 ./work/ef/8093eeddf3ac5525a28174ab7aef98/blastp.tsv
+5000Mbp -rw-rw---- 1 evan storage 6.6G Apr 10 13:56 ./work/b0/ae138202b43652848e1b45865170be/blastp.tsv
+5000Mbp -rw-rw---- 1 evan storage 6.6G Apr 2 11:44 ./work/79/c4e7615c779434cacd0b804a0b133e/blastp.tsv
+10000Mbp -rw-rw---- 1 evan storage 950M Apr 1 06:28 ./work/38/2cc50fd6c47a58a173c25c3811d9ed/blastp.tsv
+10000Mbp -rw-rw---- 1 evan storage 950M Apr 9 10:36 ./work/82/f6a918d5ef482cfc1c1878b3a82a52/blastp.tsv

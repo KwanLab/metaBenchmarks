@@ -1,0 +1,8 @@
+78Mbp -rw-r--r-- 1 evan evan 1.1G Mar 31 05:52 ./work/b4/80c921ed617c5b48bf1a95911c7018/metagenome.filtered.filtered.orfs.blastp
+156Mbp -rw-r--r-- 1 evan evan 2.3G Mar 28 19:28 ./work/57/cfe0266016e682944ed6363e60e6c6/metagenome.filtered.filtered.orfs.blastp
+312Mbp -rw-r--r-- 1 evan evan 4.2G Mar 31 11:16 ./work/51/08d8502be65584d316fc1033b992cb/metagenome.filtered.filtered.orfs.blastp
+625Mbp -rw-r--r-- 1 evan evan 8.6G Apr 3 19:37 ./work/f3/6d3c8919cc806b9fb0b7682675e6a4/metagenome.filtered.filtered.orfs.blastp
+1250Mbp -rw-r--r-- 1 evan evan 18G Mar 30 17:19 ./work/29/6de439405df367f63d165b374c7efb/metagenome.filtered.filtered.orfs.blastp
+2500Mbp -rw-r--r-- 1 evan evan 32G Apr 3 00:28 ./work/5e/cf86a0b3b46e79f8b79bd8b8904134/metagenome.filtered.filtered.orfs.blastp
+5000Mbp -rw-r--r-- 1 evan evan 50G Apr 1 18:53 ./work/9a/27c0d9e52f88f7d9416258b72b9efc/metagenome.filtered.filtered.orfs.blastp
+10000Mbp -rw-r--r-- 1 evan evan 6.9G Apr 1 01:24 ./work/db/bf450f5bd87b8fb6b9eef199092839/metagenome.filtered.filtered.orfs.blastp

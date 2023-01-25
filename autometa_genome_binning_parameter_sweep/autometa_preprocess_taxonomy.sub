@@ -1,0 +1,32 @@
+
+universe = docker
+docker_image = jasonkwan/autometa:latest
+# Change to universe = vanilla if wish to use opensciencegrid (singularity image)
+# +SingularityImage = "/cvmfs/singularity.opensciencegrid.org/jasonkwan/autometa:latest"
+log = $(community)_taxonomy_$(Cluster)_$(Process).log
+
+initial_dir = $(communityDir)
+# input files = env.tar.gz, assembly, ncbi_tarball
+# NOTE: metagenome.filtered.fna is in $(initial_dir)/metagenome.filtered.fna AKA $(community)/metagenome.filtered.fna
+transfer_input_files = /home/erees/autometa_runs/binning_param_sweep/data/databases/ncbi.tar.gz,metagenome.filtered.fna,autometa_taxonomy.sh
+executable = ./autometa_taxonomy.sh
+output = $(community)_taxonomy_$(Cluster)_$(Process).out
+error = $(community)_taxonomy_$(Cluster)_$(Process).err
+
+should_transfer_files = YES
+when_to_transfer_output = ON_EXIT
+
+request_cpus = 16
+request_memory = 128GB
+request_disk = 400GB
+# +WantGlideIn = true
++WantFlocking = true
++LongJob = true
+
+
+Requirements = (Target.HasCHTCStaging == true)
+# Requirements = (Target.HasCHTCStaging == true) && ( HAS_SINGULARITY || (HasSingularity && HAS_CVMFS_oasis_opensciencegrid_org))
+
+# queue communityDir,community from test_inputs_communities.txt
+# queue communityDir,community from inputs_communities.txt
+queue communityDir,community from 2500_5000_communities.txt

@@ -1,0 +1,1 @@
+nextflow run . -c simulated.new.config -profile slurm -resume -work-dir new_work
