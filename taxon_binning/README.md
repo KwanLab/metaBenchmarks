@@ -49,7 +49,7 @@ conda activate taxon-binning-benchmarks
 
 ```bash
 docker build \
-    git@github.com:KwanLab/Autometa.git#c85ab9673345f62e9d6a7e1aecb2d1c4e1b0c598 \
+    https://github.com/KwanLab/Autometa.git#c85ab9673345f62e9d6a7e1aecb2d1c4e1b0c598#c85ab9673345f62e9d6a7e1aecb2d1c4e1b0c598 \
     -t jasonkwan/autometa:1.0.3
 ```
 
